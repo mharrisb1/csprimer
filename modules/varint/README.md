@@ -6,7 +6,9 @@
 
 ## Explainers
 
-### Signed vs. Unsigned Integers
+<details>
+
+<summary>Signed vs. Unsigned Integers</summary>
 
 At a simplfied level, we can say that:
 
@@ -31,7 +33,11 @@ but is much more friendly for the machine.
 
 [^1]: Some programming languages like Python support variable size integers.
 
-### What does it mean for a value to be a certain number of bit?
+</details>
+
+<details>
+
+<summary>What does it mean for a value to be a certain number of bit?</summary>
 
 - For a lot of higher-level languages like Python and JS, you don't have to think about the size of data types like integers
 - In lower-level languages (C/C++, Rust, C#, Java, Go) you do need to think about this becuase of things like overflows/underflows, efficiency, etc.
@@ -50,34 +56,4 @@ A more pervasive issue seen in the software engineering is Postgres uses a 32-bi
 reach a point where they hit above roughly 4 billion transactions (technically $2^32$) the index overflows back to 0. If the team
 hasn't cleaned up the old transactions then this becomes a problem.
 
-### Little vs. Big Endian
-
-[Source](https://www.youtube.com/watch?v=jhErugDB-34)
-
-- **Byte ordering**: how multi-byte types are stored in memory
-- Computer memory is just a large array of bytes (8 bits)
-- There are 2 different standards to byte ordering:
-  1. Little endian
-  2. Big endian
-
-Example:
-
-32-bit (4-byte) integer: `12 34 56 78` (305419896)
-
-We can store it in big endian:
-
-| Address | Contents (Hex) |
-| ------- | -------------- |
-| 100     | 12             |
-| 101     | 34             |
-| 102     | 56             |
-| 103     | 78             |
-
-Or in little endian:
-
-| Address | Contents (Hex) |
-| ------- | -------------- |
-| 100     | 78             |
-| 101     | 56             |
-| 102     | 34             |
-| 103     | 12             |
+</details>
