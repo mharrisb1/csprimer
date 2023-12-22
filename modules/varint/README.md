@@ -81,4 +81,14 @@ that uses litte-endian you may need to perform [byte swapping](https://en.wikipe
 
 View more on the Wikipedia entry for [Endianness](https://en.wikipedia.org/wiki/Endianness).
 
+One **big gotcha** is that endianness refers to *byte-ordering*, not *bit ordering*. The difference ther is this:
+
+Byte ordering:
+
+`0001 1001` vs `1001 0001`
+
+Bit ordering:
+
+`0001 1101` vs `1011 1000`
+
 </details>
