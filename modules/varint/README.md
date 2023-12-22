@@ -25,18 +25,30 @@ In real life, the above scheme for signed integers doesn't really work well sinc
 adder circuitry for both unsigned and signed intgers, generally involving a simple gradeschool algorithm,
 with carries.
 
-The common scheme used is called [two's complement](https://en.wikipedia.org/wiki/Two%27s_complement).
+The common scheme used is called [two's complement](https://en.wikipedia.org/wiki/Two%27s_complement) where the
+most significant bit in a 4-bit unsigned integer actually corresponds to -8. This is less intuitive to humans
+but is much more friendly for the machine. 
 
 [^1]: Some programming languages like Python support variable size integers.
 
 ### What does it mean for a value to be a certain number of bit?
 
-- For a lot of high-level languages like Python and JS, you don't have to think about the size of data types like integers
+- For a lot of higher-level languages like Python and JS, you don't have to think about the size of data types like integers
 - In lower-level languages (C/C++, Rust, C#, Java, Go) you do need to think about this becuase of things like overflows/underflows, efficiency, etc.
 
 Example:
 
-Let's say we have a 4-bit integer (unsigned for simplicity)
+Let's say we have a 4-bit integer (unsigned for simplicity) of `1111` (15 in decimal) and we added 1 to it
+then we would have an overflow and the result would actually be `0000` (0 in decimal.
+
+So, to make sure that we don't run into issue like this, we need to pick a size for our data that
+gives us enough room necessary for our operations.
+
+A real life example of a catastrophic error resulting from an overflow is the [Ariane flight V88](https://en.wikipedia.org/wiki/Ariane_flight_V88).
+
+A more pervasive issue seen in the software engineering is Postgres uses a 32-bit index for the transactions table, so when companies
+reach a point where they hit above roughly 4 billion transactions (technically $2^32$) the index overflows back to 0. If the team
+hasn't cleaned up the old transactions then this becomes a problem.
 
 ### Little vs. Big Endian
 
