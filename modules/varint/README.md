@@ -57,3 +57,28 @@ reach a point where they hit above roughly 4 billion transactions (technically $
 hasn't cleaned up the old transactions then this becomes a problem.
 
 </details>
+
+<details>
+
+<summary>Big-endian vs. little endian</summary>
+
+Why can't we just have one byte order?
+
+Some machines use one vs. the other as well as some protocols make use of one vs. the other
+so it's always a good idea to keep this in mind to not just simple assume one vs. the other.
+
+For example, Intel machines would encode the value `511` as `ff 01`, but ARM machines would encode
+the same value as `01 ff`.
+
+In the Intel example, it is encoded as "little-endian" meaning the most significant byte is at the
+right-most place, and the ARM machines encoded it as "big-endian" with the most significant bit
+being on the left-most place.
+
+Another example is if you had a TCP port (which is represented as 2 bytes), if you had the value
+`01 02` for the port, the value should be 258 (256 + 2), since Big-endian is the dominant
+ordering in major networking protocols. But if you received thos raw bytes on an architecture
+that uses litte-endian you may need to perform [byte swapping](https://en.wikipedia.org/wiki/Endianness#Byte_swapping).
+
+View more on the Wikipedia entry for [Endianness](https://en.wikipedia.org/wiki/Endianness).
+
+</details>
