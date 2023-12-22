@@ -8,7 +8,7 @@
 
 <details>
 
-<summary>Signed vs. Unsigned Integers</summary>
+<summary><h3>Signed vs. Unsigned Integers<h3></summary>
 
 At a simplfied level, we can say that:
 
@@ -37,7 +37,7 @@ but is much more friendly for the machine.
 
 <details>
 
-<summary>What does it mean for a value to be a certain number of bit?</summary>
+<summary><h3>What does it mean for a value to be a certain number of bit?<h3></summary>
 
 - For a lot of higher-level languages like Python and JS, you don't have to think about the size of data types like integers
 - In lower-level languages (C/C++, Rust, C#, Java, Go) you do need to think about this becuase of things like overflows/underflows, efficiency, etc.
