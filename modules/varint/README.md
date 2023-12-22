@@ -60,7 +60,7 @@ hasn't cleaned up the old transactions then this becomes a problem.
 
 <details>
 
-<summary>Big-endian vs. little endian</summary>
+<summary><h3>Big-endian vs. little endian<h3></summary>
 
 Why can't we just have one byte order?
 
