@@ -4,10 +4,6 @@
 
 1. [Base 128 varints](https://protobuf.dev/programming-guides/encoding/#varints)
 
-## Protocol Buffers Encoding
-
- 
-
 ## Explainers
 
 ### Signed vs. Unsigned Integers
@@ -16,6 +12,16 @@ At a simplfied level, we can say that:
 
 - unsigned integers contains the set of [natural numbers](https://en.wikipedia.org/wiki/Natural_number) ($\mathbb{N}$)
 - signed integers contains the set of [integers](https://en.wikipedia.org/wiki/Integer) ($\mathbb{Z}$)
+
+Because computers need to work with discrete chunks of data we need to usually[^1] deal with sized integers
+so for example a 4-bit unsigned integer (not usually something that is supported) could represent any natural
+number from [0, 15]. For example, you would have something like `0101` which would represent 5.
+
+When dealing with *signed* integers, the most significant bit will either be a 0 for positive integers or 1 for
+negative integers. So, again if we used a size of 4-bits we could represent any number from [-7, 7]. For example,
+if you had something like `1001`, that would be equal to -1.
+
+[^1] Some programming languages like Python support variable size integers.
 
 ### What does it mean for a value to be a certain number of bit?
 
