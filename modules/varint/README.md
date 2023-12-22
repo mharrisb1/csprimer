@@ -21,6 +21,12 @@ When dealing with *signed* integers, the most significant bit will either be a 0
 negative integers. So, again if we used a size of 4-bits we could represent any number from [-7, 7]. For example,
 if you had something like `1001`, that would be equal to -1.
 
+In real life, the above scheme for signed integers doesn't really work well since you can't use the same
+adder circuitry for both unsigned and signed intgers, generally involving a simple gradeschool algorithm,
+with carries.
+
+The common scheme used is called [two's complement](https://en.wikipedia.org/wiki/Two%27s_complement).
+
 [^1]: Some programming languages like Python support variable size integers.
 
 ### What does it mean for a value to be a certain number of bit?
