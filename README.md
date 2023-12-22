@@ -2,6 +2,6 @@
 
 ## Modules
 
-1. [Protobuf varint](/modules/varint/notes.md)
+1. [Protobuf varint](/modules/varint)
 
 ## Seminars
