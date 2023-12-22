@@ -21,7 +21,7 @@ When dealing with *signed* integers, the most significant bit will either be a 0
 negative integers. So, again if we used a size of 4-bits we could represent any number from [-7, 7]. For example,
 if you had something like `1001`, that would be equal to -1.
 
-[^1] Some programming languages like Python support variable size integers.
+[^1]: Some programming languages like Python support variable size integers.
 
 ### What does it mean for a value to be a certain number of bit?
 
