@@ -1,9 +1,30 @@
 # Varint Module Notes
 
-## Protocol Buffers Encoding
-- 
+## Links
 
-## Misc
+1. [Base 128 varints](https://protobuf.dev/programming-guides/encoding/#varints)
+
+## Protocol Buffers Encoding
+
+ 
+
+## Explainers
+
+### Signed vs. Unsigned Integers
+
+At a simplfied level, we can say that:
+
+- unsigned integers contains the set of [natural numbers](https://en.wikipedia.org/wiki/Natural_number) ($\mathbb{N}$)
+- signed integers contains the set of [integers](https://en.wikipedia.org/wiki/Integer) ($\mathbb{Z}$)
+
+### What does it mean for a value to be a certain number of bit?
+
+- For a lot of high-level languages like Python and JS, you don't have to think about the size of data types like integers
+- In lower-level languages (C/C++, Rust, C#, Java, Go) you do need to think about this becuase of things like overflows/underflows, efficiency, etc.
+
+Example:
+
+Let's say we have a 4-bit integer (unsigned for simplicity)
 
 ### Little vs. Big Endian
 
