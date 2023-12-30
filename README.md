@@ -1,7 +1,5 @@
 # CS Primer
 
-## Modules
+## Courses
 
-1. [Protobuf varint](/modules/varint)
-
-## Seminars
+1. [Computer Systems](/courses/computer-systems/README.md)
