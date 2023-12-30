@@ -2,4 +2,4 @@
 
 ## Courses
 
-1. [Computer Systems](/courses/computer-systems/README.md)
+1. [Computer Systems](./computer-systems/README.md)
