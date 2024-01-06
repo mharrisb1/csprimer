@@ -27,13 +27,7 @@ class BmpFile(Serializable):
         self._pixel_array = pixel_array
 
     def rotate(self) -> None:
-        """
-        Rotates the image in place.
-
-        Because of the way the pixel array is laid out (last row first),
-        if we want to rotate the image as we see it 90deg clockwise,
-        that is equivalent to a 90deg rotation counter-clockwise.
-        """
+        """Mutates this instance's pixel array by rotating 90deg"""
         cols = self.dib_header.width
         rows = self.dib_header.height
         arr = self.pixel_array.array
