@@ -4,3 +4,4 @@
 2. [CSS color convert](./css-color-convert/README.md)
 3. [Beep beep boop](/computer-systems/bits-and-bytes/beep-beep-boop/README.md)
 4. [Image rotate](/computer-systems/bits-and-bytes/image-rotate/README.md)
+5. [TCP SYN flood](/computer-systems/bits-and-bytes/tcp-syn-flood/README.md)
