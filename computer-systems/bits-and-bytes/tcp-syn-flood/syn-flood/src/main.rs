@@ -1,5 +1,16 @@
 use std::io::Read;
 
+fn main() {
+    let mut reader = std::io::stdin();
+    let mut buffer = Vec::new();
+    reader.read_to_end(&mut buffer).unwrap();
+    let file = pcap::File::from_bytes(&buffer);
+    println!("{}", file.header);
+    for packet in file.iter_packets() {
+        println!("{}", packet.header);
+    }
+}
+
 mod pcap {
     use std::fmt::Display;
 
@@ -121,16 +132,5 @@ mod pcap {
                 )
             }
         }
-    }
-}
-
-fn main() {
-    let mut reader = std::io::stdin();
-    let mut buffer = Vec::new();
-    reader.read_to_end(&mut buffer).unwrap();
-    let file = pcap::File::from_bytes(&buffer);
-    println!("{}", file.header);
-    for packet in file.iter_packets() {
-        println!("{}", packet.header);
     }
 }
