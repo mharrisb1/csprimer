@@ -21,7 +21,7 @@ mod pcap {
 
     impl<'a> File<'a> {
         pub fn from_bytes(bytes: &'a [u8]) -> Self {
-            let header = Header::from_bytes(&bytes[0..24]);
+            let header: Header = (&bytes[0..24]).into();
             let mut packets = Vec::new();
             let mut offset: usize = 24;
             while offset < bytes.len() {
@@ -47,15 +47,9 @@ mod pcap {
         llh: u32,
     }
 
-    impl Header {
-        fn from_bytes(bytes: &[u8]) -> Self {
-            let sized: [u8; 24] = bytes.try_into().unwrap();
-            sized.into()
-        }
-    }
-
-    impl From<[u8; 24]> for Header {
-        fn from(value: [u8; 24]) -> Self {
+    impl From<&[u8]> for Header {
+        fn from(value: &[u8]) -> Self {
+            let value: [u8; 24] = value.try_into().unwrap();
             Self {
                 magic: u32::from_le_bytes(value[0..4].try_into().unwrap()),
                 major: u16::from_le_bytes(value[4..6].try_into().unwrap()),
@@ -88,7 +82,7 @@ mod pcap {
 
         impl<'a> Packet<'a> {
             pub fn from_bytes(bytes: &'a [u8]) -> Self {
-                let header = Header::from_bytes(&bytes[0..16]);
+                let header: Header = (&bytes[0..16]).into();
                 let data = &bytes[16..header.captured as usize + 16];
                 Self { header, data }
             }
@@ -105,15 +99,9 @@ mod pcap {
             total: u32,
         }
 
-        impl Header {
-            fn from_bytes(bytes: &[u8]) -> Self {
-                let sized: [u8; 16] = bytes.try_into().unwrap();
-                sized.into()
-            }
-        }
-
-        impl From<[u8; 16]> for Header {
-            fn from(value: [u8; 16]) -> Self {
+        impl From<&[u8]> for Header {
+            fn from(value: &[u8]) -> Self {
+                let value: [u8; 16] = value.try_into().unwrap();
                 Self {
                     ts_s: u32::from_le_bytes(value[0..4].try_into().unwrap()),
                     ts_ms: u32::from_le_bytes(value[4..8].try_into().unwrap()),
