@@ -6,17 +6,17 @@ fn main() {
     reader.read_to_end(&mut buffer).unwrap();
     let file = pcap::File::from_bytes(&buffer);
     println!("{}", file.header);
-    for packet in file.iter_packets() {
+    for packet in file.packets.iter() {
         println!("{}", packet.header);
     }
 }
 
 mod pcap {
-    use std::fmt::Display;
+    use packet::Packet;
 
     pub struct File<'a> {
         pub header: Header,
-        packets: Vec<packets::Packet<'a>>,
+        pub packets: Vec<Packet<'a>>,
     }
 
     impl<'a> File<'a> {
@@ -25,15 +25,11 @@ mod pcap {
             let mut packets = Vec::new();
             let mut offset: usize = 24;
             while offset < bytes.len() {
-                let packet = packets::Packet::from_bytes(&bytes[offset..]);
-                offset += packet.size();
+                let packet = Packet::from_bytes(&bytes[offset..]);
+                offset += packet.header.captured as usize + 16;
                 packets.push(packet);
             }
             Self { header, packets }
-        }
-
-        pub fn iter_packets(&'a self) -> impl Iterator<Item = &'a packets::Packet> {
-            self.packets.iter()
         }
     }
 
@@ -62,7 +58,7 @@ mod pcap {
         }
     }
 
-    impl Display for Header {
+    impl std::fmt::Display for Header {
         fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
             write!(
                 f,
@@ -72,9 +68,7 @@ mod pcap {
         }
     }
 
-    mod packets {
-        use std::fmt::Display;
-
+    mod packet {
         pub struct Packet<'a> {
             pub header: Header,
             pub data: &'a [u8],
@@ -86,17 +80,13 @@ mod pcap {
                 let data = &bytes[16..header.captured as usize + 16];
                 Self { header, data }
             }
-
-            pub fn size(&self) -> usize {
-                self.header.captured as usize + 16
-            }
         }
 
         pub struct Header {
-            ts_s: u32,
-            ts_ms: u32,
-            captured: u32,
-            total: u32,
+            pub ts_s: u32,
+            pub ts_ms: u32,
+            pub captured: u32,
+            pub total: u32,
         }
 
         impl From<&[u8]> for Header {
@@ -111,7 +101,7 @@ mod pcap {
             }
         }
 
-        impl Display for Header {
+        impl std::fmt::Display for Header {
             fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
                 write!(
                     f,
