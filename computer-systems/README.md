@@ -1,3 +1,3 @@
 # Computer Systems
 
-1. [Bits and bytes](./bits-and-bytes/README.md)
+1. [Bits and bytes](./bits-and-bytes)
