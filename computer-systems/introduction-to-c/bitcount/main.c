@@ -4,12 +4,12 @@
 int bitcount(uint32_t n) {
   int count;
   count = 0;
-  do {
+  while (n > 0) {
     if ((n & 0x1) == 0x1) {
       count++;
     }
     n >>= 1;
-  } while (n > 0);
+  };
   return count;
 }
 
