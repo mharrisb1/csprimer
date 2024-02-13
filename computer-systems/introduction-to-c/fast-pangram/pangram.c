@@ -1,17 +1,18 @@
-#include <ctype.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
+
+#define MASK 0x7FFFFFE
 
 bool ispangram(char *s) {
-  int check = 0;
-  for (int i = 0; i < strlen(s); i++) {
-    if (isalpha(tolower(s[i]))) {
-      check |= (1 << ((int)s[i] - 97));
-    }
+  uint32_t bs = 0;
+  char c;
+  while ((c = *s++) != '\0') {
+    if (c < '@')
+      continue; // ignore first 64 chars
+    bs |= 1 << (c & 0x1F); // the mask here ensures that only uppercase is used
   }
-  return check == 0x3FFFFFF; // all 26 of the LSBs should be flipped on if pangram
+  return (bs & MASK) == MASK;
 };
 
 int main() {
