@@ -18,56 +18,45 @@ DA *DA_new(void) {
   return da;
 }
 
-int DA_size(DA *da) { return da->size; }
+void DA_free(DA *da) {
+  free(da->arr);
+  free(da);
+}
+
+size_t DA_size(DA *da) { return da->size; }
 
 void DA_push(DA *da, void *x) {
   if (da->size == da->capacity) {
-    printf("Doubling capacity\n");
-    da->capacity *= 2;
-    void **arr = malloc(sizeof(void *) * da->capacity);
-    for (int i = 0; i < da->size; i++) {
-      arr[i] = da->arr[i];
-    }
-    free(da->arr);
-    da->arr = arr;
+    da->capacity <<= 1;
+    da->arr = realloc(da->arr, sizeof(void *) * da->capacity);
+    printf("Resized to %d\n", (int)da->capacity);
   }
-  da->arr[da->size] = x;
-  da->size++;
+  da->arr[da->size++] = x;
 }
 
 void *DA_pop(DA *da) {
   if (da->size == 0)
     return NULL;
-  if (da->size * 2 < da->capacity && da->capacity > STARTING_CAPACITY) {
-    printf("Halfing capacity\n");
-    da->capacity = da->size + 1;
-    void **arr = malloc(sizeof(void *) * da->capacity);
-    for (int i = 0; i < da->size; i++) {
-      arr[i] = da->arr[i];
-    }
-    free(da->arr);
-    da->arr = arr;
+  if (da->size * 2 <= da->capacity && da->capacity > STARTING_CAPACITY) {
+    da->capacity >>= 1;
+    da->arr = realloc(da->arr, sizeof(void *) * da->capacity);
+    printf("Resized to %d\n", (int)da->capacity);
   }
-  da->size--;
-  void *x = da->arr[da->size];
+  void *x = da->arr[--da->size];
   return x;
 }
 
-void DA_set(DA *da, void *x, int i) {
-  if (i < 0 || i > da->size)
-    return;
-  da->arr[i] = x;
+void DA_set(DA *da, void *x, size_t i) {
+  if (0 <= i <= da->size)
+    da->arr[i] = x;
 }
 
-void *DA_get(DA *da, int i) {
-  if (i < 0 || i > da->size)
+void *DA_get(DA *da, size_t i) {
+  if (0 <= i <= da->size) {
+    return da->arr[i];
+  } else {
     return NULL;
-  return da->arr[i];
-}
-
-void DA_free(DA *da) {
-  free(da->arr);
-  free(da);
+  }
 }
 
 int main() {
