@@ -4,3 +4,4 @@
 2. [Bitcount](./bitcount)
 3. [Fast pangram](./fast-pangram)
 4. [Dynamic array](./dynamic-array)
+5. [Varint C Extension](./varint-c-extension)
