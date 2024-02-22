@@ -3,3 +3,9 @@ target/
 .DS_Store
 *.o
 *.out*
+__pycache__
+.devcontainer
+.venv
+.vscode
+*.egg-info
+dist
