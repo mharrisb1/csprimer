@@ -26,30 +26,30 @@ void Node_free(Node *n) {
   free(n);
 }
 
-typedef struct LinkSet {
+typedef struct LinkMap {
   Node *head;
-} LinkSet;
+} LinkMap;
 
-LinkSet *LinkSet_new() {
-  LinkSet *ll = malloc(sizeof(LinkSet));
+LinkMap *LinkMap_new() {
+  LinkMap *ll = malloc(sizeof(LinkMap));
   ll->head = NULL;
   return ll;
 }
 
-void LinkSet_free(LinkSet *ls) {
-  if (ls->head != NULL)
-    Node_free(ls->head);
-  free(ls);
+void LinkMap_free(LinkMap *lm) {
+  if (lm->head != NULL)
+    Node_free(lm->head);
+  free(lm);
 }
 
-bool LinkSet_empty(LinkSet *ls) { return ls->head == NULL; }
+bool LinkMap_is_empty(LinkMap *lm) { return lm->head == NULL; }
 
-void LinkSet_add(LinkSet *ls, char *key, void *value) {
-  if (LinkSet_empty(ls)) {
-    ls->head = Node_new(key, value);
+void LinkMap_add(LinkMap *lm, char *key, void *value) {
+  if (LinkMap_is_empty(lm)) {
+    lm->head = Node_new(key, value);
     return;
   }
-  Node *next = ls->head;
+  Node *next = lm->head;
   Node *last = next;
   while (next != NULL) {
     if (strcmp(next->key, key) == 0) {
@@ -62,11 +62,11 @@ void LinkSet_add(LinkSet *ls, char *key, void *value) {
   last->next = Node_new(key, value);
 }
 
-void LinkSet_delete(LinkSet *ls, char *key) {
-  if (LinkSet_empty(ls))
+void LinkMap_delete(LinkMap *lm, char *key) {
+  if (LinkMap_is_empty(lm))
     return;
-  Node *prev = ls->head;
-  Node *curr = ls->head;
+  Node *prev = lm->head;
+  Node *curr = lm->head;
   while (curr != NULL) {
     if (strcmp(curr->key, key) == 0) {
       prev->next = curr->next;
@@ -83,9 +83,9 @@ void LinkSet_delete(LinkSet *ls, char *key) {
 #include <assert.h>
 #include <stdio.h>
 
-unsigned long LinkSet_size(LinkSet *ls) {
+unsigned long LinkMap_size(LinkMap *lm) {
   unsigned long n = 0;
-  Node *next = ls->head;
+  Node *next = lm->head;
   while (next != NULL) {
     n++;
     next = next->next;
@@ -95,33 +95,33 @@ unsigned long LinkSet_size(LinkSet *ls) {
 
 int main(void) {
   // test construction
-  LinkSet *ls = LinkSet_new();
-  assert(ls->head == NULL);
-  assert(LinkSet_empty(ls));
+  LinkMap *lm = LinkMap_new();
+  assert(lm->head == NULL);
+  assert(LinkMap_is_empty(lm));
 
   // test add when emtpy
   int x = 10;
-  LinkSet_add(ls, "foo", &x);
-  assert(!LinkSet_empty(ls));
-  assert(LinkSet_size(ls) == 1);
+  LinkMap_add(lm, "foo", &x);
+  assert(!LinkMap_is_empty(lm));
+  assert(LinkMap_size(lm) == 1);
 
   // test append
-  LinkSet_add(ls, "bar", &x);
-  assert(LinkSet_size(ls) == 2);
+  LinkMap_add(lm, "bar", &x);
+  assert(LinkMap_size(lm) == 2);
 
   // test overwrite
-  LinkSet_add(ls, "foo", &x);
-  LinkSet_add(ls, "bar", &x);
-  assert(LinkSet_size(ls) == 2);
+  LinkMap_add(lm, "foo", &x);
+  LinkMap_add(lm, "bar", &x);
+  assert(LinkMap_size(lm) == 2);
 
   // test delete
-  LinkSet_delete(ls, "bar");
-  assert(LinkSet_size(ls) == 1);
-  LinkSet_delete(ls, "foo");
-  assert(LinkSet_empty(ls));
-  LinkSet_delete(ls, "baz"); // test that invalid keys do not error
+  LinkMap_delete(lm, "bar");
+  assert(LinkMap_size(lm) == 1);
+  LinkMap_delete(lm, "foo");
+  assert(LinkMap_is_empty(lm));
+  LinkMap_delete(lm, "baz"); // test that invalid keys do not error
 
-  LinkSet_free(ls);
+  LinkMap_free(lm);
   printf("ok\n");
 }
 #endif
