@@ -9,5 +9,5 @@ add unit tests for the linkset implementation.
 ssfw -p linkset.c -c 'cc -g -DUNIT_TESTING linkset.c && ./a.out && leaks --atExit -- ./a.out'
 ````
 
-> [!INFORMATION]
-> Makes use of my [ssfw](https://github.com/mharrisb1/ssfw) utility.
+> [!IMPORTANT]
+> Relies on my [ssfw](https://github.com/mharrisb1/ssfw) utility.
