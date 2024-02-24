@@ -2,6 +2,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+#ifndef MAX_KEY_SIZE
+#define MAX_KEY_SIZE 8
+#endif
+
 typedef struct Node {
   char *key;
   void *value;
@@ -10,7 +14,8 @@ typedef struct Node {
 
 Node *Node_new(char *key, void *value) {
   Node *node = malloc(sizeof(Node));
-  node->key = key;
+  node->key = (char *)malloc(sizeof(char) * MAX_KEY_SIZE);
+  strcpy(node->key, key);
   node->value = value;
   node->next = NULL;
   return node;
@@ -21,8 +26,9 @@ void Node_free(Node *n) {
   while (next != NULL) {
     Node *curr = next;
     next = next->next;
-    free(curr);
+    Node_free(curr);
   }
+  free(n->key);
   free(n);
 }
 
