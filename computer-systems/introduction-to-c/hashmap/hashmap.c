@@ -1,5 +1,5 @@
+#include "linkmap.c"
 #include <stdlib.h>
-#include <string.h>
 
 #ifndef STARTING_BUCKETS
 #define STARTING_BUCKETS 8
@@ -13,60 +13,58 @@ int hash(char *s, unsigned long k) {
   return n % k;
 }
 
-typedef struct Node {
-  char *k;
-  void *v;
-  void *next;
-} Node;
-
-Node *Node_new(char *k, void *v) {
-  Node *n = malloc(sizeof(Node));
-  n->k = k;
-  n->v = v;
-  n->next = NULL;
-  return n;
-}
-
-void Node_free(Node *n) { free(n); }
-
 typedef struct Hashmap {
   size_t buckets;
-  void **nodes;
+  LinkMap **maps;
 } Hashmap;
 
 Hashmap *Hashmap_new() {
   Hashmap *hm = malloc(sizeof(Hashmap));
   hm->buckets = STARTING_BUCKETS;
-  hm->nodes = malloc(sizeof(void *) * hm->buckets);
+  hm->maps = malloc(sizeof(LinkMap) * hm->buckets);
+  for (int i; i < hm->buckets; i++) {
+    hm->maps[i] = NULL;
+  }
   return hm;
 }
 
 void Hashmap_free(Hashmap *hm) {
-  free(hm->nodes);
+  for (int i; i < hm->buckets; i++) {
+    if (hm->maps[i] != NULL) {
+      LinkMap_free(hm->maps[i]);
+    }
+  }
   free(hm);
 }
 
 void Hashmap_set(Hashmap *hm, char *k, void *v) {
   int i = hash(k, hm->buckets);
-  if (hm->nodes[i] != NULL) {
-    Node *curr = hm->nodes[i];
-    do {
-      if (strcmp(curr->k, k)) {
-        curr->v = v;
-        break;
-      }
-      curr = curr->next;
-    } while (curr->next != NULL);
-    curr->next = Node_new(k, v);
+  LinkMap *lm = hm->maps[i];
+  if (lm == NULL) {
+    lm = LinkMap_new();
+    lm->head = Node_new(k, v);
+    hm->maps[i] = lm;
   } else {
-    hm->nodes[i] = Node_new(k, v);
+    LinkMap_set(lm, k, v);
   }
 }
 
 void *Hashmap_get(Hashmap *hm, char *k) {
-  // TODO
+  int i = hash(k, hm->buckets);
+  LinkMap *lm = hm->maps[i];
+  if (lm != NULL) {
+    Node *n = LinkMap_get(lm, k);
+    if (n != NULL) {
+      return n->value;
+    }
+  }
+  return NULL;
 }
 
 void Hashmap_delete(Hashmap *hm, char *k) {
-  // TODO
+  int i = hash(k, hm->buckets);
+  LinkMap *lm = hm->maps[i];
+  if (lm != NULL) {
+    LinkMap_delete(lm, k);
+  }
 }

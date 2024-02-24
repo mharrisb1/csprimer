@@ -44,32 +44,37 @@ void LinkMap_free(LinkMap *lm) {
 
 bool LinkMap_is_empty(LinkMap *lm) { return lm->head == NULL; }
 
-void LinkMap_add(LinkMap *lm, char *key, void *value) {
+void LinkMap_set(LinkMap *lm, char *key, void *value) {
   if (LinkMap_is_empty(lm)) {
     lm->head = Node_new(key, value);
     return;
   }
-  Node *next = lm->head;
-  Node *last = next;
-  while (next != NULL) {
-    if (strcmp(next->key, key) == 0) {
-      next->value = value;
+  Node *prev = NULL;
+  Node *curr = lm->head;
+  while (curr != NULL) {
+    if (strcmp(curr->key, key) == 0) {
+      curr->value = value;
       return;
     }
-    last = next;
-    next = next->next;
+    prev = curr;
+    curr = prev->next;
   }
-  last->next = Node_new(key, value);
+  prev->next = Node_new(key, value);
 }
 
 void LinkMap_delete(LinkMap *lm, char *key) {
   if (LinkMap_is_empty(lm))
     return;
-  Node *prev = lm->head;
+  Node *prev = NULL;
   Node *curr = lm->head;
   while (curr != NULL) {
     if (strcmp(curr->key, key) == 0) {
-      prev->next = curr->next;
+      if (prev == NULL) {
+        lm->head = NULL;
+      } else {
+        prev->next = curr->next;
+        curr->next = NULL;
+      }
       Node_free(curr);
       break;
     } else {
@@ -77,6 +82,17 @@ void LinkMap_delete(LinkMap *lm, char *key) {
       curr = prev->next;
     }
   }
+}
+
+Node *LinkMap_get(LinkMap *lm, char *key) {
+  Node *curr = lm->head;
+  while (curr != NULL) {
+    if (strcmp(curr->key, key) == 0) {
+      return curr;
+    }
+    curr = curr->next;
+  }
+  return NULL;
 }
 
 #ifdef UNIT_TESTING
@@ -101,25 +117,34 @@ int main(void) {
 
   // test add when emtpy
   int x = 10;
-  LinkMap_add(lm, "foo", &x);
+  float y = 1.33;
+  LinkMap_set(lm, "foo", &x);
   assert(!LinkMap_is_empty(lm));
   assert(LinkMap_size(lm) == 1);
 
   // test append
-  LinkMap_add(lm, "bar", &x);
+  LinkMap_set(lm, "bar", &x);
   assert(LinkMap_size(lm) == 2);
+  LinkMap_set(lm, "bat", &y);
+  assert(LinkMap_size(lm) == 3);
+
+  // test get
+  assert(LinkMap_get(lm, "bar")->value == &x);
+  assert(LinkMap_get(lm, "bat")->value == &y);
+  assert(LinkMap_get(lm, "fox") == NULL);
 
   // test overwrite
-  LinkMap_add(lm, "foo", &x);
-  LinkMap_add(lm, "bar", &x);
-  assert(LinkMap_size(lm) == 2);
+  LinkMap_set(lm, "foo", &y);
+  LinkMap_set(lm, "bar", &x);
+  assert(LinkMap_size(lm) == 3);
 
   // test delete
   LinkMap_delete(lm, "bar");
-  assert(LinkMap_size(lm) == 1);
+  assert(LinkMap_size(lm) == 2);
   LinkMap_delete(lm, "foo");
+  LinkMap_delete(lm, "bat");
   assert(LinkMap_is_empty(lm));
-  LinkMap_delete(lm, "baz"); // test that invalid keys do not error
+  LinkMap_delete(lm, "baz"); // test that delete on invalid keys do not error
 
   LinkMap_free(lm);
   printf("ok\n");
