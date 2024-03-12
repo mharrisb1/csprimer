@@ -6,9 +6,9 @@ mat_index:
 ; edx: cols
 ; ecx: rindex
 ; r8d: cindex
-        imul rdx, 4                    ; calc row width
-        imul rcx, rdx                  ; calc row offset
-        imul r8, 4                     ; calc col offset
-        add rcx, r8                    ; calc total offset
-        mov rax, [rdi + rcx]           ; dereference element at offset
+; pointer offset from matrix:
+; (rindex * cols * 4) + (cindex * 4) = 4 * (rindex * cols + cindex)
+        imul rcx, rdx
+        add rcx, r8
+        mov rax, [rdi + rcx*4]
         ret
