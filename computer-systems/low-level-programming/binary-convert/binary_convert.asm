@@ -1,29 +1,17 @@
-        %define MASK 01h
-
         section .text
         global binary_convert
 binary_convert:
-        xor eax, eax                   ; accumulator, init to 0
-        xor ecx, ecx                   ; power, init to 0
-        xor rsi, rsi                   ; string offset, init to 0
-
-.strlen:
-        movzx edx, byte[rdi + rsi]     ; get char at offset
-        cmp edx, 0
-        je .loop
-        add rsi, 1                     ; increment offset
-        jmp .strlen
+        xor eax, eax                   ; zero out accumulator
 
 .loop:
-        cmp esi, 0                     ; guards against seg faults
-        je .done
-        sub esi, 1
-        movzx edx, byte[rdi + rsi]     ; get char at offset
-        and edx, MASK                  ; turn '0' -> 0 or '1' -> 1
-        shl edx, cl                    ; edx := edx**power
-        add cl, 1                      ; increment power
-        add eax, edx                   ; add to accumulator
+        movzx ecx, byte [rdi]          ; take next byte from input string
+        cmp ecx, 0                     ; check if null byte
+        je .end
+        and ecx, 1                     ; get ls bit from char
+        shl eax, 1                     ; acc << 1
+        add eax, ecx                   ; add char to acc
+        add rdi, 1                     ; inc to next char pointer
         jmp .loop
 
-.done:
+.end:
         ret
