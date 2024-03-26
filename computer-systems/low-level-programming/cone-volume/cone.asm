@@ -5,15 +5,11 @@
 ; xmm0 = radius (and return)
 ; xmm1 = height
 volume:
-        mulss xmm0, xmm0               ; r^2
-        mulss xmm0, [pi]               ; r^2 * pi
-        mulss xmm0, xmm1               ; r^2 * pi * h
-        divss xmm0, [three_f]          ; 1/3 * (r^2 * pi * h)
+        mulss xmm0, xmm0               ; v = r^2
+        mulss xmm0, xmm1               ; v *= h
+        mulss xmm0, [pi_on_3]          ; v *= pi/3
         ret
 
-        section .data
-pi:
-        dd 3.1416                      ; approx pi
-
-three_f:
-        dd 3.0                         ; 3 floating point
+        section .rodata
+pi_on_3:
+        dd 1.0472
