@@ -6,3 +6,4 @@
 4. [x86-64 Pangram](./x86-64-pangram)
 5. [Binary convert](./binary-convert)
 6. [Cone volume](./cone-volume)
+7. [x86 Fibonacci](./x86-fib)
