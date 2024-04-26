@@ -23,6 +23,10 @@
  * L1 loads     6,270 M         136 M      148 M
  * L1 misses       94 M           4 M       67 M
  *
+ * Changes:
+ *
+ * - Better struct packing
+ *
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -30,9 +34,9 @@
 #include <time.h>
 
 struct number {
-  short foo;
   int value;
   short bar;
+  short foo;
 };
 
 int sum(struct number nums[], int indexes[], int n) {
