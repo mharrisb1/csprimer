@@ -111,6 +111,7 @@ varint_decode:
         ldrb w1, [sp, 29]     // load shift counter from stack
         add w1, w1, 7         // increment shift counter by 7
         strb w1, [sp, 29]     // store incremented shift counter on stack
+        b .dequeue
 
 .return:
         ldr x0, [sp]          // load i from stack in return register
