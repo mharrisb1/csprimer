@@ -2,20 +2,20 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#define BUF_SIZE 10
+#define BUF 10
 
 extern void varint_encode(uint8_t *buf, uint64_t i);
 
-extern uint64_t varint_decode(uint8_t *buf, uint8_t size);
+extern uint64_t varint_decode(uint8_t *buf);
 
 int main() {
   uint64_t i;
 
   for (uint64_t i = 0; i < UINT64_MAX; i++) {
-    uint8_t buf[BUF_SIZE] = {0};
+    uint8_t buf[BUF] = {0};
 
     varint_encode(buf, i);
-    uint64_t decoded = varint_decode(buf, BUF_SIZE);
+    uint64_t decoded = varint_decode(buf);
 
     if (i != decoded) {
       printf("Failed to encode/decode for `%ld`\n", i);
