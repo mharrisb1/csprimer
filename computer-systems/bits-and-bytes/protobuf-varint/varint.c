@@ -2,15 +2,13 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#define BUF 10
-
 extern void varint_encode(uint8_t *buf, uint64_t i);
 
 extern uint64_t varint_decode(uint8_t *buf);
 
 int main() {
   for (uint64_t i = 0; i < UINT64_MAX; i++) {
-    uint8_t buf[BUF] = {0};
+    uint8_t buf[10] = {0};
 
     varint_encode(buf, i);
     uint64_t decoded = varint_decode(buf);
