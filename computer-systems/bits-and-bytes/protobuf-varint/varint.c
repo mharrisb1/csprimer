@@ -9,8 +9,6 @@ extern void varint_encode(uint8_t *buf, uint64_t i);
 extern uint64_t varint_decode(uint8_t *buf);
 
 int main() {
-  uint64_t i;
-
   for (uint64_t i = 0; i < UINT64_MAX; i++) {
     uint8_t buf[BUF] = {0};
 
