@@ -13,6 +13,12 @@
                 void varint_encode(uint8_t *buf, uint64_t i);
                 uint64_t varint_decode(uint8_t *buf);
 
+        Approach
+        ----------
+
+        - Try to hand code the asm as much as possible and refer to compiled asm for hints
+        - Whether my own work or from copying the compiler's output, annotate every line
+
         Notes
         ----------
 
@@ -20,9 +26,9 @@
                 - 8 bytes for buf address, 8 bytes for i, 1 byte for temp counter (== 17 bytes)
                 - For perf, it is recommended to align using a multiple of 16 (round up to 32)
                 - Decode is similar with 8 bytes for buf address, 1 byte for size, and 8 bytes for return value
-        - Use `[x/w]zr` register to access a zero value without having to manually set a register to zero
+        - Use `[x/w]zr` register to access a zero value without having to manually set a register to zero first
         - The compiler (GCC using -O0) only uses 2 registers. Is there a good reason for this? Can you make it faster otherwise?
-        - The compiler adds some nop instructions. Is this because of a compiler trick or is the way the C is written confusing?
+        - The compiler adds some `nop` instructions. Is this because of a compiler trick or is the way the C is written confusing?
         - Are there any good examples of well-structured assembly codebases that minimize repeating code?
 
         References
@@ -31,7 +37,6 @@
         - https://developer.arm.com/documentation/ddi0602/2024-03/Base-Instructions
         - https://developer.arm.com/documentation/102374/0101/Procedure-Call-Standard
         - https://developer.arm.com/documentation/102374/0101/Registers-in-AArch64---general-purpose-registers
-        - https://courses.cs.washington.edu/courses/cse469/19wi/arm64.pdf
 
         Additional Resources
         --------------------
