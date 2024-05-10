@@ -1,34 +1,49 @@
-#include <stdint.h>
+#include <ctype.h>
 #include <stdio.h>
-#include <string.h>
-
-#define MAX_HEX_LEN 8
+#include <stdlib.h>
 
 typedef enum {
-  IDLE,
+  ACCEPT,
   CONSUME,
   CONVERT,
   ERROR,
-  ACCEPT,
 } State;
 
-void process(const char t, const char *line, State state, uint8_t *buf,
-             uint8_t ix) {
-  switch (state) {
-  case IDLE:
+void process(const char t, State *state, char *buf, char *ix) {
+  switch (*state) {
+
+  case ACCEPT:
     if (t == '#') {
-      //
+      *state = CONSUME;
+      *ix = 0;
     } else {
       printf("%c", t);
     }
     break;
+
   case CONSUME:
+    if (t == ';') {
+      *state = CONVERT;
+    } else if (isxdigit(t)) {
+      buf[(*ix)++] = t;
+    }
+    *state = ERROR;
     break;
+
   case CONVERT:
+    printf("rgb(");
+    for (char i = 0; i < 6; i += 2) {
+      char h[2] = {buf[i], buf[i + 1]};
+      printf("%u", (int)strtol(h, NULL, 16));
+      if (i != 4) {
+        printf(" ");
+      }
+    }
+    printf(");\n");
+    *state = ACCEPT;
     break;
+
   case ERROR:
-    break;
-  case ACCEPT:
     break;
   }
 }
@@ -38,13 +53,18 @@ int main() {
   size_t len = 0;
   ssize_t nread;
 
-  while ((nread = getline(&line, &len, stdin)) != -1) {
-    State state = IDLE;
-    uint8_t buf[MAX_HEX_LEN + 1];
-    uint8_t ix = 0;
+  State state = ACCEPT;
+  char buf[6];
+  char ix = 0;
 
-    for (uint8_t i = 0; i < nread; i++) {
-      process(line[i], line, state, buf, ix);
+  while ((nread = getline(&line, &len, stdin)) != -1) {
+    for (char i = 0; i < nread; i++) {
+      process(line[i], &state, buf, &ix);
+      if (state == ERROR) {
+        printf("ERROR: Failed to parse CSS at token `%c` (col %u of %zd)\n",
+               line[i], i + 1, nread);
+        return 1;
+      }
     }
   }
 }
