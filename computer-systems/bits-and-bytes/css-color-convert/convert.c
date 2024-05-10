@@ -9,9 +9,14 @@ typedef enum {
   ERROR,
 } State;
 
-void process(const char t, State *state, char *buf, char *ix) {
-  switch (*state) {
+#ifdef USE_EXTERN
 
+extern void process_token(const char t, State *state, char *buf, char *x);
+
+#else
+
+void process_token(const char t, State *state, char *buf, char *ix) {
+  switch (*state) {
   case ACCEPT:
     if (t == '#') {
       *state = CONSUME;
@@ -20,7 +25,6 @@ void process(const char t, State *state, char *buf, char *ix) {
       printf("%c", t);
     }
     break;
-
   case CONSUME:
     if (t == ';') {
       *state = CONVERT;
@@ -29,7 +33,6 @@ void process(const char t, State *state, char *buf, char *ix) {
     }
     *state = ERROR;
     break;
-
   case CONVERT:
     printf("rgb(");
     for (char i = 0; i < 6; i += 2) {
@@ -42,11 +45,12 @@ void process(const char t, State *state, char *buf, char *ix) {
     printf(");\n");
     *state = ACCEPT;
     break;
-
   case ERROR:
     break;
   }
 }
+
+#endif
 
 int main() {
   char *line = NULL;
@@ -59,7 +63,7 @@ int main() {
 
   while ((nread = getline(&line, &len, stdin)) != -1) {
     for (char i = 0; i < nread; i++) {
-      process(line[i], &state, buf, &ix);
+      process_token(line[i], &state, buf, &ix);
       if (state == ERROR) {
         printf("ERROR: Failed to parse CSS at token `%c` (col %u of %zd)\n",
                line[i], i + 1, nread);
