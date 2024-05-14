@@ -22,7 +22,7 @@
 
         Notes:
                 - Still a little fuzzy on frame pointer and return address (link register)
-                - Remove use of `bhi` instruction since I don't need to handle case when state value is invalid
+                - Remove use of `bhi` instruction since I don't need to handle case when state value not in range [0, 3]
 */
 
         .text
