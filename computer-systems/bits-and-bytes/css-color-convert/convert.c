@@ -11,7 +11,7 @@ typedef enum {
 
 #ifdef USE_EXTERN
 
-extern void process_token(const char t, State *state, char *buf, char *x);
+extern void process_token(const char t, State *state, char *buf, char *ix);
 
 #else
 
