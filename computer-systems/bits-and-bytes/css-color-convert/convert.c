@@ -30,8 +30,9 @@ void process_token(const char t, State *state, char *buf, char *ix) {
       *state = CONVERT;
     } else if (isxdigit(t)) {
       buf[(*ix)++] = t;
+    } else {
+      *state = ERROR;
     }
-    *state = ERROR;
     break;
   case CONVERT:
     printf("rgb(");
