@@ -56,15 +56,45 @@ process_token:
         cmp w0, 0x23                    // is the token the start of a hex sequence? t == '#'
         bne .print_tok
         ldr x0, [sp, 32]                // load reference to state from stack
-        mov w1, 1                       // set register to immediate value 1
+        mov w1, 1
         str w1, [x0]                    // *state = CONSUME
         ldr x0, [sp, 16]                // load reference to buffer index from stack
         strb wzr, [x0]                  // reset buffer index to 0
         b .end
 
+.CONSUME:
+        ldrb w0, [sp, 47]               // load token value from stack
+        cmp w0, 0x3B                    // is the token the terminator? t == ';'
+        bne .is_hex
+        ldr x0, [sp, 32]                // load reference to state from stack
+        mov w1, 2
+        str w1, [x0]                    // *state = CONVERT
+        b .end
+
 .print_tok:
         ldrb w0, [sp, 47]               // load token value from stack
         bl putchar                      // branch to address of stdlib `putchar` func to print token
+        b .end
+
+.is_hex:
+        ldrb w0, [sp, 47]               // load token value from stack
+        bl isxdigit                     // branch to address of stdlib `isxdigit` func
+        cbnz w0, .enqueue               // if result of `isxdigit` is not zero then move on to add token to buffer
+        ldr x0, [sp, 32]                // load reference to state from stack
+        mov w1, 3
+        str w1, [x0]                    // *state = ERROR
+        b .end
+        
+.enqueue:
+        /* FIXME: post-increment ix */
+        ldr x0, [sp, 16]                // load reference to buffer index from stack
+        ldrb w1, [x0]                   // dereference pointer
+        add w1, w1, 1                   // increment value
+        strb w1, [x0]                   // store incremented value at reference location
+        ldr x0, [sp, 24]                // load reference to buffer from stack
+        add x0, x1, x0                  // increment address by buffer index as offset
+        ldrb w1, [sp, 47]               // load token value from stack
+        strb w1, [x0]                   // store token at buf[ix]
         b .end
 
 .end:
