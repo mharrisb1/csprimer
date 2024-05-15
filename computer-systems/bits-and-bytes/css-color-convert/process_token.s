@@ -14,6 +14,7 @@
                         - CONVERT (2): converts all values in buffer to RGB form until exhausted
                         - ERROR (3): a non-hex value or `;` is found during consumption state
                 - Initial state (s_0) is ACCEPT
+                - Accepting states = {ACCEPT}
 
         Function signature:
 
@@ -22,7 +23,6 @@
         Notes:
                 - Still a little fuzzy on frame pointer and return address (link register)
                 - Remove use of `bhi` instruction since I don't need to handle case when state value not in range [0, 3]
-                - Need a lot more details on `adrp` instruction to fully get it
 
         References:
                 - ChatGPT
@@ -32,15 +32,6 @@
         .text
         .global process_token
         .type process_token, @function
-
-.C0:
-        .string "rgb("
-
-.C1:
-        .string "%u"
-
-.C2:
-        .string ");"
 
 process_token:
         stp x29, x30, [sp, -64]!        // store current values of the frame pointer and link register to the stack
@@ -80,8 +71,7 @@ process_token:
         b .end
 
 .CONVERT:
-        adrp x0, .C0                    // store upper 52 bits of address to get page address
-        add x0, x0, :lo12:.C0           // add the lower 12 bits to get precise location
+        ldr x0, =s0                     // load string constant from data
         bl printf                       // branch to address of stdlib `printf` func
         strb wzr, [sp, 63]              // initialize i
         b .iter_buf
@@ -103,8 +93,8 @@ process_token:
 .enqueue:
         ldr x0, [sp, 16]                // load reference to buffer index from stack
         ldrb w1, [x0]                   // dereference pointer
-        add w0, w1, 1                   // increment value and store in different register to respect post-increment
-        strb w0, [x0]                   // store incremented value at reference location
+        add w2, w1, 1                   // increment value and store in different register to respect post-increment
+        strb w2, [x0]                   // store incremented value at reference location
         ldr x0, [sp, 24]                // load reference to buffer from stack
         add x0, x1, x0                  // increment address by buffer index as offset
         ldrb w1, [sp, 47]               // load token value from stack
@@ -127,8 +117,7 @@ process_token:
         mov w2, 16                      // set w2 to 16 which is used as the base for strtol
         bl strtol                       // branch to address of stdlib `strtol` func
         mov w1, w0                      // move return value of strtol to second arg to printf
-        adrp x0, .C1                    // store upper 52 buts of address to get page address
-        add x0, x0, :lo12:.C1           // add lower 12 bits to get exact address
+        ldr x0, =s1                     // load string constant from data
         bl printf                       // branch to address of stdlib `printf` func
         ldrb w0, [sp, 63]               // load i from stack
         cmp w0, 4
@@ -145,8 +134,7 @@ process_token:
         ldrb w0, [sp, 63]               // load i from stack
         cmp w0, 5
         bls .print_buf_pair             // if i <= 5 branch
-        adrp x0, .C2                    // store upper 52 bits of address to get page address
-        add x0, x0, :lo12:.C2           // get exact address
+        ldr x0, =s2                     // load string constant from data
         bl puts                         // branch to address of stlib `puts` func
         ldr x0, [sp, 32]                // load reference to state from stack
         str wzr, [x0]                   // *state = ACCEPT
@@ -155,3 +143,14 @@ process_token:
 .end:
         ldp x29, x30, [sp], 64          // restore original values of frame pointer and link register and deallocate from stack
         ret
+
+        .data
+
+s0:
+        .string "rgb("
+
+s1:
+        .string "%u"
+
+s2:
+        .string ");"
