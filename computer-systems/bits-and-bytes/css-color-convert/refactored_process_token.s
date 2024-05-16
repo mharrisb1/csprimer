@@ -22,7 +22,6 @@
 
 */
 
-/* Constants */
 .equ INITIATOR_TOK,    0x23 // #
 .equ TERMINATOR_TOK,   0x3B // ;
 .equ ACCEPT,           0x00
@@ -36,7 +35,7 @@
 
 process_token:
         /* allocate bytes to stack and save frame pointer and link register */
-        stp x29, x30, [sp, -64]!
+        stp x29, x30, [sp, -80]!
         mov x29, sp
 
         /* save callee-saved registers */
@@ -46,6 +45,8 @@ process_token:
         str x22, [sp, 40]
         str x23, [sp, 48]
         str x24, [sp, 56]
+        str x25, [sp, 64]
+        str x26, [sp, 72]
         
         /* core values for operations */
         mov w19, w0                // token value
@@ -54,6 +55,8 @@ process_token:
         mov x22, x3                // buffer index reference
         ldrb w23, [x22]            // dereferenced buffer index
         mov x24, x2                // buffer reference
+        mov w25, 2                 // alt buffer index
+        mov x26, xzr               // temp token store
 
         /* NOTE: will never enter here in ERROR state */
 .switch:
@@ -81,23 +84,22 @@ process_token:
 .converting:
         ldr x0, =opening_seq
         bl printf
-        mov w22, 2
 
 .convert_pair:
-        ldrb w23, [x24, x22]
-        strb wzr, [x24, x22]
-        sub w22, w22, 2
-        add x0, x24, x22
+        ldrb w26, [x24, x25]
+        strb wzr, [x24, x25]
+        sub w25, w25, 2
+        add x0, x24, x25
         mov w1, 0
         mov w2, 16
         bl strtol
         mov w1, w0
         ldr x0, =uintfs
         bl printf
-        add w22, w22, 2
-        strb w23, [x24, x22]
-        add w22, w22, 2
-        cmp w22, 6
+        add w25, w25, 2
+        strb w26, [x24, x25]
+        add w25, w25, 2
+        cmp w25, 8
         beq .done_converting
         mov w0, 0x20
         bl putchar
@@ -105,9 +107,6 @@ process_token:
 
 .done_converting:
         ldr x0, =closing_seq
-        mov x1, 0
-        mov x2, 0
-        mov x3, 0
         bl printf
         mov w1, ACCEPT
         b .transition
@@ -130,13 +129,15 @@ process_token:
         ldr x22, [sp, 40]
         ldr x23, [sp, 48]
         ldr x24, [sp, 56]
+        ldr x25, [sp, 64]
+        ldr x26, [sp, 72]
 
         /* deallocate bytes from stack and restore frame pointer and link register */
-        ldp x29, x30, [sp], 64
+        ldp x29, x30, [sp], 80
         ret
 
         .data
 
 opening_seq:        .string "rgb("
-closing_seq:        .string ");"
+closing_seq:        .string ");\n"
 uintfs:             .string "%u"
