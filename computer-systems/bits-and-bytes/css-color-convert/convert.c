@@ -1,6 +1,8 @@
+#include <bits/time.h>
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 
 typedef enum {
   ACCEPT,
@@ -62,6 +64,10 @@ int main() {
   char buf[6];
   char ix = 0;
 
+  struct timespec start, end;
+  double total_time = 0;
+  clock_gettime(CLOCK_MONOTONIC, &start);
+
   while ((nread = getline(&line, &len, stdin)) != -1) {
     for (char i = 0; i < nread; i++) {
       process_token(line[i], &state, buf, &ix);
@@ -72,4 +78,11 @@ int main() {
       }
     }
   }
+
+  clock_gettime(CLOCK_MONOTONIC, &end);
+
+  total_time =
+      (end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec) / 1e9;
+  printf("Total execution time: %f seconds\n", total_time);
+  return 0;
 }
