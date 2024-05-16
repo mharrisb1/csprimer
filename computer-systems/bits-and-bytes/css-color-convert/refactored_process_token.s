@@ -22,6 +22,14 @@
 
 */
 
+/* Constants */
+.equ INITIATOR_TOK,    0x23 // #
+.equ TERMINATOR_TOK,   0x3B // ;
+.equ ACCEPT,           0x00
+.equ CONSUME,          0x01
+.equ CONVERT,          0x02
+.equ ERROR,            0x03
+
         .text
         .global process_token
         .type process_token, @function
@@ -42,29 +50,77 @@ process_token:
         /* core values for operations */
         mov w19, w0                // token value
         mov x20, x1                // state reference
-        mov w21, [x20]             // dereferenced state value
+        ldrb w21, [x20]            // dereferenced state value
         mov x22, x3                // buffer index reference
-        mov w23, [x22]             // dereferenced buffer index
+        ldrb w23, [x22]            // dereferenced buffer index
         mov x24, x2                // buffer reference
 
         /* NOTE: will never enter here in ERROR state */
 .switch:
-        cmp w21, 2
+        cmp w21, CONVERT
         beq .converting
-        cmp w21, 1
+        cmp w21, CONSUME
         beq .consuming
 
 .accepting:
-        cmp w19, =initiator
-        beq .transconsume
+        mov w1, CONSUME            // eagerly set next state
+        cmp w19, INITIATOR_TOK
+        beq .transition
         bl putchar                 // token is already in w0 register
         b .end
 
 .consuming:
-        nop
+        mov w1, CONVERT
+        cmp w19, TERMINATOR_TOK
+        beq .transition
+        mov w1, ERROR
+        bl isxdigit                // token is already in w0 register
+        cbnz w0, .enqueue
+        b .transition
 
-.transconsume:
-        nop
+.converting:
+        ldr x0, =opening_seq
+        bl printf
+        mov w22, 2
+
+.convert_pair:
+        ldrb w23, [x24, x22]
+        strb wzr, [x24, x22]
+        sub w22, w22, 2
+        add x0, x24, x22
+        mov w1, 0
+        mov w2, 16
+        bl strtol
+        mov w1, w0
+        ldr x0, =uintfs
+        bl printf
+        add w22, w22, 2
+        strb w23, [x24, x22]
+        add w22, w22, 2
+        cmp w22, 6
+        beq .done_converting
+        mov w0, 0x20
+        bl putchar
+        b .convert_pair
+
+.done_converting:
+        ldr x0, =closing_seq
+        mov x1, 0
+        mov x2, 0
+        mov x3, 0
+        bl printf
+        mov w1, ACCEPT
+        b .transition
+
+.enqueue:
+        add w1, w23, 1
+        strb w1, [x22]             // save incremented value
+        strb w19, [x24, x23]       // write token to buffer offset loc
+        b .end
+
+.transition:
+        strb w1, [x20]             // write to state
+        strb wzr, [x22]            // reset buffer index to 0
 
 .end:
         /* restore callee-saved registers */
@@ -80,5 +136,7 @@ process_token:
         ret
 
         .data
-initiator:        .byte 0x23       // #
-terminator:       .byte 0x3B       // ;
+
+opening_seq:        .string "rgb("
+closing_seq:        .string ");"
+uintfs:             .string "%u"
