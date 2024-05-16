@@ -1,6 +1,6 @@
 /*
         @author Michael Harris
-        @date   2024-05
+        @date   2024-05-13
 
         FSM that processes a single token from a line in the CSS file and compiles hexidecimal form to RGB form.
 
@@ -86,22 +86,22 @@ process_token:
         bl printf
 
 .convert_pair:
-        ldrb w26, [x24, x25]
-        strb wzr, [x24, x25]
-        sub w25, w25, 2
-        add x0, x24, x25
-        mov w1, 0
-        mov w2, 16
+        ldrb w26, [x24, x25]       // store token in temp store
+        strb wzr, [x24, x25]       // set buffer at offset to null terminator
+        sub w25, w25, 2            // get start index
+        add x0, x24, x25           // start of pair [p0, p1, \0]
+        mov w1, 0                  // set second arg to NULL
+        mov w2, 16                 // set to base16
         bl strtol
-        mov w1, w0
-        ldr x0, =uintfs
+        mov w1, w0                 // move result to second arg
+        ldr x0, =uintfs            // set fstring to first arg
         bl printf
-        add w25, w25, 2
-        strb w26, [x24, x25]
-        add w25, w25, 2
-        cmp w25, 8
+        add w25, w25, 2            // restore alt buffer index to prev value
+        strb w26, [x24, x25]       // move value back from temp store to buffer
+        add w25, w25, 2            // increment alt buffer index
+        cmp w25, 8                 // there should only be 6 values in buffer
         beq .done_converting
-        mov w0, 0x20
+        mov w0, 0x20               // print <space>
         bl putchar
         b .convert_pair
 
