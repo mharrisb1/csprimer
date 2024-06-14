@@ -32,6 +32,10 @@
  *        - https://www.json.org/json-en.html
  *        - https://developer.mozilla.org/en-US/docs/Web/HTTP/Messages
  *
+ *        Notes
+ *        -----
+ *        - There's a bug where spaces in value string are ignore
+ *
  */
 
 .equ NULL,              0x00
