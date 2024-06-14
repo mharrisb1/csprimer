@@ -37,11 +37,6 @@ int main() {
 
   strcpy(writebuf, "HTTP/1.1 200 OK\nContent-Type: application/json\n\n");
   hhtojson(readbuf, writebuf, strlen(writebuf));
-
-  printf("%s\n", readbuf);
-  printf("%s\n", writebuf);
-  printf("%lu\n", strlen(writebuf));
-
   send(connfd, writebuf, strlen(writebuf), 0);
 
   shutdown(sockfd, 2);
