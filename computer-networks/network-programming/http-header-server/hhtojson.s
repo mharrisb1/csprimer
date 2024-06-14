@@ -75,7 +75,7 @@ _hhtojson:
 
 .tokenize:
         ldr x0, [sp, 0]       // load readbuf pointer from stack
-        ldr w1, [sp, 24]     // load read index from stack
+        ldr w1, [sp, 24]      // load read index from stack
         add x0, x0, x1        // get read address
         ldrb w0, [x0]         // read char
         add w1, w1, 1         // increment read index
