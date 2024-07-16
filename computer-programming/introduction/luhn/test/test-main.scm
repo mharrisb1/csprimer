@@ -2,8 +2,8 @@
 
 (define (assert condition message)
   (if (not condition)
-    (displayln "Assertion failed:" message)
-    (displayln "Test passed")))
+    (displayln "❌ Assertion failed:" message)
+    (displayln "✅ Test passed")))
 
 ;; Valid credit card numbers
 (assert (is-valid? "4532015112830366") "Test failed: 4532015112830366 should be valid")
