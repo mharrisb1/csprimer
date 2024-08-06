@@ -4,7 +4,7 @@ Implementations of the Luhn algorithm in 4 different languages:
 
 1. Scheme ([Steel](https://github.com/mattwparas/steel) dialect)
 2. C
-3. A64 Assembly
+3. A64 Assembly (🚧 incomplete)
 4. Python (used as reference below)
 
 ## Reference implementation
