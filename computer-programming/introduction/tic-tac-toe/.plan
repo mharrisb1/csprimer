@@ -78,7 +78,9 @@ a grave marker to allow the program to skip checking for a win in this slice.
 The grave marker will just be an on bit.
 
 NOTE: We can determine a cat's game by using an XOR 0xFF on bytes [24, 31] and if
-we get 0x0 then all grave markers have been flipped on.
+we get 0x0 then all grave markers have been flipped on. The reason we're not just
+naively looking at the count and checking if that is 9, is you can reach a state
+where no winning slices are left prior to reaching the 9th move.
 
 31             24  22     18     15                             0
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -86,6 +88,15 @@ we get 0x0 then all grave markers have been flipped on.
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 \______________/\___/\______/\__________________________________/
  possible slice  1st   count          game board state
+
+Checking a slice
+----------------
+
+A frequent procedure in the program will be checking the slices. There are two
+ways that slices must be checked:
+
+1. Check for win
+2. Check to mark grave
 
 Example game
 ------------
