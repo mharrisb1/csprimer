@@ -23,8 +23,8 @@ Board overview
 +---------+---------+---------+---------+---------+---------+---------+---------+---------+
      8         7         6         5         4         3         2         1         0
 
-Winning slices
---------------
+Winning subsets
+---------------
 
 1) [(0, 0), (1, 0), (2, 0)] = [0, 1, 2]
 2) [(0, 1), (1, 1), (2, 1)] = [3, 4, 5]
@@ -71,7 +71,7 @@ There will also be a 2-bit marker for which side the player chooses to play as.
 This uses the same identifiers as above with `00` meaning the first move has not
 been made. This brings the total used bits to 24.
 
-The remaining 8 bits will be flags indicating which winning slices we can ignore.
+The remaining 8 bits will be flags indicating which winning subsets we can ignore.
 For example, if both an `X` and an `O` are present in the left top to right bottom
 diagonal winning slice then no player can win that way. We give this possibility
 a grave marker to allow the program to skip checking for a win in this slice.
@@ -80,7 +80,7 @@ The grave marker will just be an on bit.
 NOTE: We can determine a cat's game by using an XOR 0xFF on bytes [24, 31] and if
 we get 0x0 then all grave markers have been flipped on. The reason we're not just
 naively looking at the count and checking if that is 9, is you can reach a state
-where no winning slices are left prior to reaching the 9th move.
+where no winning subsets are left prior to reaching the 9th move.
 
 31             24  22     18     15                             0
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -92,8 +92,8 @@ where no winning slices are left prior to reaching the 9th move.
 Checking a slice
 ----------------
 
-A frequent procedure in the program will be checking the slices. There are two
-ways that slices must be checked:
+A frequent procedure in the program will be checking the subsets. There are two
+ways that subsets must be checked:
 
 1. Check for win
 2. Check to mark grave
