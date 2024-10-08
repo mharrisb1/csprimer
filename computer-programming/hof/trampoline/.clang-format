@@ -1,0 +1,6 @@
+BasedOnStyle: llvm
+AlignConsecutiveAssignments: AcrossComments
+AlignConsecutiveMacros: AcrossComments
+AlignConsecutiveDeclarations: true
+IndentCaseLabels: true
+
