@@ -96,7 +96,7 @@ void Grid_transition(Grid *src, Grid *dst) {
 void Grid_display(Grid *grid) {
   for (int y = 0; y < grid->height; y++) {
     for (int x = 0; x < grid->width; x++) {
-      printf("%s", grid->cells[x + grid->width * y] ? ALIVE_TOK : DEAD_TOK);
+      printf("%s", Grid_get_cell(grid, x, y) ? ALIVE_TOK : DEAD_TOK);
     }
     printf("\n");
   }
