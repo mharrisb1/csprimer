@@ -77,21 +77,17 @@ int Grid_get_cell_neighbor_count(Grid *grid, int x, int y) {
   return k;
 }
 
-Grid *Grid_next(Grid *grid) {
-  Grid *grid_next = Grid_new(grid->width, grid->height);
-  for (int y = 0; y < grid_next->height; y++) {
-    for (int x = 0; x < grid_next->width; x++) {
-      int neighbor_k = Grid_get_cell_neighbor_count(grid, x, y);
-      if (Grid_get_cell(grid, x, y)) {
-        Grid_set_cell(grid_next, x, y, 2 <= neighbor_k && neighbor_k <= 3);
+void Grid_transition(Grid *src, Grid *dst) {
+  for (int y = 0; y < dst->height; y++) {
+    for (int x = 0; x < dst->width; x++) {
+      int neighbor_k = Grid_get_cell_neighbor_count(src, x, y);
+      if (Grid_get_cell(src, x, y)) {
+        Grid_set_cell(dst, x, y, 2 <= neighbor_k && neighbor_k <= 3);
       } else {
-        Grid_set_cell(grid_next, x, y, neighbor_k == 3);
+        Grid_set_cell(dst, x, y, neighbor_k == 3);
       }
     }
   }
-  Grid_swap(&grid, &grid_next);
-  Grid_free(grid_next);
-  return grid;
 }
 
 void Grid_display(Grid *grid) {
@@ -103,20 +99,26 @@ void Grid_display(Grid *grid) {
   }
 }
 
+void clear_term() { fputs("\033c", stdout); }
+
+void sleep_ms(int ms) { usleep(ms * 1e3); }
+
 int main() {
   int interval_ms = 100;
   int width, height, iterations;
   width = height = iterations = 50;
 
-  Grid *grid = Grid_new(width, height);
+  Grid *grid      = Grid_new(width, height);
+  Grid *grid_next = Grid_new(width, height);
   Grid_seed(grid);
 
   while (iterations) {
-    fputs("\033c", stdout);
+    clear_term();
     Grid_display(grid);
-    usleep(interval_ms * 1000);
-    grid = Grid_next(grid);
+    Grid_transition(grid, grid_next);
+    Grid_swap(&grid, &grid_next);
     iterations--;
+    sleep_ms(interval_ms);
   }
   Grid_free(grid);
 }
