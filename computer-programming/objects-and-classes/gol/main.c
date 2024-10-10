@@ -5,6 +5,9 @@
 #define ALIVE_TOK "██"
 #define DEAD_TOK  "░░"
 
+#define clear_term() fputs("\033c", stdout)
+#define sleep_ms(ms) usleep(ms * 1e3)
+
 typedef struct {
   int  width;
   int  height;
@@ -99,10 +102,6 @@ void Grid_display(Grid *grid) {
   }
 }
 
-void clear_term() { fputs("\033c", stdout); }
-
-void sleep_ms(int ms) { usleep(ms * 1e3); }
-
 int main() {
   int interval_ms = 100;
   int width, height, iterations;
@@ -110,6 +109,7 @@ int main() {
 
   Grid *grid      = Grid_new(width, height);
   Grid *grid_next = Grid_new(width, height);
+
   Grid_seed(grid);
 
   while (iterations) {
@@ -120,5 +120,7 @@ int main() {
     iterations--;
     sleep_ms(interval_ms);
   }
+
   Grid_free(grid);
+  Grid_free(grid_next);
 }
