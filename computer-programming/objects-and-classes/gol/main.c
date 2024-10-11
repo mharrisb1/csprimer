@@ -70,7 +70,7 @@ int Grid_get_cell_neighbor_count(Grid *grid, int x, int y) {
       if ((i + 1) % grid->width == 0 && dx[dxi] > 0) {
         continue; // cant' look right
       }
-      if (i > ((grid->height - 1) * grid->width) && dy[dyi] > 0) {
+      if (i >= ((grid->height - 1) * grid->width) && dy[dyi] > 0) {
         continue; // can't look down
       }
       k += grid->cells[i + (dy[dyi] * grid->width + dx[dxi])];
