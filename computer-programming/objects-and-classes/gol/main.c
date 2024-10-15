@@ -103,21 +103,20 @@ void Grid_display(Grid *grid) {
 }
 
 int main() {
-  int interval_ms = 100;
-  int width, height, iterations;
-  width = height = iterations = 50;
+  int interval_ms = 200;
+  int width, height;
+  width = height = 50;
 
   Grid *grid      = Grid_new(width, height);
   Grid *grid_next = Grid_new(width, height);
 
   Grid_seed(grid);
 
-  while (iterations) {
+  while (1) {
     clear_term();
     Grid_display(grid);
     Grid_transition(grid, grid_next);
     Grid_swap(&grid, &grid_next);
-    iterations--;
     sleep_ms(interval_ms);
   }
 
