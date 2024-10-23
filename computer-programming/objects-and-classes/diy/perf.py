@@ -25,10 +25,6 @@ def vec_scalar_mul(a: VecT, k: float) -> VecT:
     return tuple(n * k for n in a)
 
 
-def vec_dot_product(a: VecT, b: VecT) -> VecT:
-    return tuple(a[n] * b[n] for n in range(len(a)))
-
-
 def vec_norm(a: VecT) -> float:
     return math.sqrt(sum(n**2 for n in a))
 
@@ -52,11 +48,8 @@ class Vec:
     def __sub__(self, other: Vec) -> Vec:
         return Vec(*(n - other._n[ix] for ix, n in enumerate(self._n)))
 
-    def __mul__(self, other: Vec | float) -> Vec:
-        if isinstance(other, Vec):
-            return Vec(*(n * other._n[ix] for ix, n in enumerate(self._n)))
-        else:
-            return Vec(*(n * other for n in self._n))
+    def __mul__(self, other: float) -> Vec:
+        return Vec(*(n * other for n in self._n))
 
     def __abs__(self) -> float:
         return math.sqrt(sum((n**2 for n in self._n)))
@@ -99,9 +92,6 @@ if __name__ == "__main__":
             # scalar mul
             (False, "smul", vec_scalar_mul, a, 3),
             (True, "smul", v1.__mul__, 3),
-            # dot
-            (False, "dot", vec_dot_product, a, b),
-            (True, "dot", v1.__mul__, v2),
             # norm
             (False, "norm", vec_norm, a),
             (True, "norm", v1.__abs__),
