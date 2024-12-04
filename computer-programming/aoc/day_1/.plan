@@ -1,0 +1,3 @@
+- Implement quick sort for vectors of size n
+- See if we can vectorize the difference operations across the two arrays
+- Reduce/fold resulting array into a single value
