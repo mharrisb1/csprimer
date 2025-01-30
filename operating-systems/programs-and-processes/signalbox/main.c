@@ -6,9 +6,10 @@
 
 #define clear_term() fputs("\033c", stdout)
 
-static int rows, cols;
+static unsigned short PRINT_TERMINAL_SIZE_FLAG = 1;
+static unsigned short EXIT_GRACEFULLY_FLAG     = 0;
 
-void get_terminal_size(int *rows, int *cols) {
+void print_terminal_dimensions() {
   struct winsize w;
   ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
   printf("%i x %i\n", w.ws_xpixel, w.ws_ypixel);
@@ -16,15 +17,13 @@ void get_terminal_size(int *rows, int *cols) {
 
 void handle_sigint(int signal) {
   if (signal == SIGINT) {
-    printf("\n");
-    exit(EXIT_SUCCESS);
+    EXIT_GRACEFULLY_FLAG = 1;
   }
 }
 
 void handle_sigwinch(int signal) {
   if (signal == SIGWINCH) {
-    clear_term();
-    get_terminal_size(&rows, &cols);
+    PRINT_TERMINAL_SIZE_FLAG = 1;
   }
 }
 
@@ -32,8 +31,15 @@ int main() {
   signal(SIGINT, handle_sigint);
   signal(SIGWINCH, handle_sigwinch);
 
-  get_terminal_size(&rows, &cols);
-
   for (;;) {
+    if (PRINT_TERMINAL_SIZE_FLAG) {
+      clear_term();
+      print_terminal_dimensions();
+      PRINT_TERMINAL_SIZE_FLAG = 0;
+    }
+    if (EXIT_GRACEFULLY_FLAG) {
+      printf("\n");
+      exit(EXIT_SUCCESS);
+    }
   }
 }
