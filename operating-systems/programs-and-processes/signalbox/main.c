@@ -6,8 +6,8 @@
 
 #define clear_term() fputs("\033c", stdout)
 
-static unsigned short PRINT_TERMINAL_SIZE_FLAG = 1;
-static unsigned short EXIT_GRACEFULLY_FLAG     = 0;
+volatile sig_atomic_t PRINT_TERMINAL_SIZE_FLAG = 1;
+volatile sig_atomic_t EXIT_GRACEFULLY_FLAG     = 0;
 
 void print_terminal_dimensions() {
   struct winsize w;
