@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #define MAXARG 256
@@ -7,7 +8,8 @@
 static const char* const PROMPT = "> ";
 static const char* const DELIM  = " \t\n";
 
-static int tokenize(char *input, char* argv[], size_t* argc);
+static int  tokenize(char *input, char *argv[], size_t *argc);
+static void print_help();
 
 int main() {
 	char buf[MAXBUF];
@@ -16,17 +18,20 @@ int main() {
 		printf(PROMPT);
 		
 		if (fgets(buf, MAXBUF, stdin) == NULL) {
-			if (feof(stdin) != 0) return 0;
+			if (feof(stdin) != 0) exit(0);
 			if (ferror(stdin) != 0) {
 				perror("fgets error");
-				return 1;
+				exit(1);
 			}
 		}
 
 		size_t argc = 0;
 		char *argv[MAXARG];
 
-		if (tokenize(buf, argv, &argc) != 0) return 1;
+		if (tokenize(buf, argv, &argc) != 0) exit(1);
+		if (argc == 0) 			     continue;
+		if (strcmp(argv[0], "quit") == 0)    exit(0);
+		if (strcmp(argv[0], "help") == 0)    print_help();
 
 		printf("argc = %zu\n", argc);
 		for (size_t i = 0; i < argc; i++) {
@@ -53,4 +58,8 @@ static int tokenize(char *input, char *argv[], size_t *argc) {
 		}
 	}
 	return 0;
+}
+
+void print_help() {
+	printf("Builtins are `quit` and `help`\n");
 }
