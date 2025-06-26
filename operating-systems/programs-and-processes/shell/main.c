@@ -60,6 +60,6 @@ static int tokenize(char *input, char *argv[], size_t *argc) {
 	return 0;
 }
 
-void print_help() {
+static void print_help() {
 	printf("Builtins are `quit` and `help`\n");
 }
