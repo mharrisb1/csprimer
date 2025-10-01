@@ -8,8 +8,6 @@
 
 #include "readline.h"
 
-#define MAXBUF 256
-
 #define NUL   0x00
 #define ETX   0x03
 #define EOT   0x04
@@ -46,8 +44,8 @@ enum xterm_sequence_t {
 };
 
 static struct termios orig;
-static void           setup();
-static void           teardown();
+static int            setup();
+static int            teardown();
 static int            read_keypress(const int fd, char seq[4], ssize_t *n);
 
 static void handle_eof();
@@ -57,19 +55,12 @@ static void handle_backspace(char *buf, const size_t len, const size_t cur);
 static void handle_arrow_left();
 static void handle_arrow_right(const char *buf, const size_t cur);
 
-char *readline(const char *prompt) {
-  setup();
+int readline(const char *prompt, char *buf) {
+  if (setup() != 0) { return -1; }
 
-  char   *buf = malloc(MAXBUF);
   size_t  len = 0, cur = 0;
   ssize_t n;
   char    seq[4];
-
-  if (!buf) {
-    teardown();
-    perror("Failed to allocate buffer");
-    return NULL;
-  }
 
   write(STDOUT_FILENO, prompt, strlen(prompt));
 
@@ -78,7 +69,8 @@ char *readline(const char *prompt) {
     memset(seq, 0, sizeof(seq)); // reset
     if (key == EOF) {
       handle_eof();
-      return NULL;
+      teardown();
+      return 1;
     } else if (key >= SPACE && key < DEL) {
       handle_key(key, buf, len, cur);
       len++;
@@ -98,25 +90,13 @@ char *readline(const char *prompt) {
 
   next_line();
 
-  buf      = realloc(buf, len + 1);
   buf[len] = '\0';
-  teardown();
-  return buf;
+  return teardown();
 }
 
-static void handle_interrupts(int sig) {
-  (void)sig;
-  teardown();
-  exit(EXIT_FAILURE);
-}
-
-static void setup() {
-  signal(SIGINT, handle_interrupts);
-  signal(SIGTERM, handle_interrupts);
-
+static int setup() {
   struct termios raw;
   tcgetattr(STDIN_FILENO, &orig);
-  atexit(teardown);
 
   raw = orig;
   raw.c_iflag &= ~(BRKINT | ICRNL | INPCK | ISTRIP | IXON);
@@ -128,14 +108,17 @@ static void setup() {
 
   if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw) == -1) {
     perror("Failed to enable raw mode");
-    exit(EXIT_FAILURE);
+    return -1;
   }
+  return 0;
 }
 
-static void teardown() {
+static int teardown() {
   if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &orig) == -1) {
     perror("Failed to disable raw mode");
+    return -1;
   }
+  return 0;
 }
 
 static int read_keypress(const int fd, char seq[4], ssize_t *n) {
@@ -179,10 +162,7 @@ static int read_keypress(const int fd, char seq[4], ssize_t *n) {
   return ESC;
 }
 
-static void handle_eof() {
-  next_line();
-  teardown();
-}
+static void handle_eof() { next_line(); }
 
 static void handle_key(const int key, char *buf, const size_t len,
                        const size_t cur) {

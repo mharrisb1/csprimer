@@ -3,11 +3,14 @@
 
 #include "readline.h"
 
-int main(void) {
-  char *line;
+#define MAXARG 256
+#define MAXBUF 4096
 
-  while ((line = readline("> ")) != NULL) {
-    printf("%s\n", line);
-    free(line);
+static const char *const PROMPT = "> ";
+
+int main(void) {
+  char buf[MAXBUF];
+  while ((readline(PROMPT, buf)) == 0) {
+    printf("%s\n", buf);
   }
 }
