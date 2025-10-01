@@ -5,6 +5,5 @@ AlignConsecutiveDeclarations: true
 IndentCaseLabels: true
 AllowShortIfStatementsOnASingleLine: true
 AllowShortCaseLabelsOnASingleLine: true
-AllowShortLoopsOnASingleLine: true
 AllowShortBlocksOnASingleLine: true
 ColumnLimit: 81
