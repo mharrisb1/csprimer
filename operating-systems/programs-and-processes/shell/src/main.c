@@ -17,7 +17,6 @@
 static const char *const PROMPT = "> ";
 static const char *const DELIM  = " \t\n";
 
-static void print_help_and_exit();
 static void handle_sigint(int sig);
 static int  tokenize(char *input, char *cmds[MAXCMD][MAXARG], int *cmdi,
                      int *argi);
@@ -35,38 +34,37 @@ int main() {
     argi = 0;
     cmdi = 0;
     if (tokenize(buf, cmds, &cmdi, &argi) != 0) exit(EXIT_FAILURE);
+
+    // eval
+    if (cmds[0][0] == NULL) continue;
+    if (strcmp(cmds[0][0], "quit") == 0) exit(EXIT_SUCCESS);
+    if (strcmp(cmds[0][0], "help") == 0) printf("Type `quit` to exit\n");
+
+    // single command
+    if (cmdi == 0) {
+
+      if ((childpid = fork()) < 0) {
+        perror("fork error");
+        exit(EXIT_FAILURE);
+      }
+
+      // child process
+      if (childpid == 0) {
+        if (execvp(cmds[cmdi][0], cmds[cmdi]) < 0) {
+          perror("exec error");
+          exit(EXIT_FAILURE);
+        }
+        exit(EXIT_FAILURE);
+      }
+
+      // parent
+      int status;
+      waitpid(childpid, &status, 0);
+    }
     buf[0] = '\0';
-
-    // // eval
-    // if (cmdi == 0) continue;
-    // if (strcmp(argv[0], "quit") == 0) exit(EXIT_SUCCESS);
-    // if (strcmp(argv[0], "help") == 0) print_help_and_exit();
-
-    // if ((childpid = fork()) < 0) {
-    //   perror("fork error");
-    //   exit(EXIT_FAILURE);
-    // }
-
-    // // child process
-    // if (childpid == 0) {
-    //   if (execvp(argv[0], argv) < 0) {
-    //     perror("exec error");
-    //     exit(EXIT_FAILURE);
-    //   }
-    //   exit(EXIT_FAILURE);
-    // }
-
-    // // parent
-    // int status;
-    // waitpid(childpid, &status, 0);
   }
 
   return EXIT_SUCCESS;
-}
-
-static void print_help_and_exit() {
-  printf("Builtins are `quit` and `help`\n");
-  exit(EXIT_SUCCESS);
 }
 
 static void handle_sigint(int sig) {
