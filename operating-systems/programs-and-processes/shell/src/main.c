@@ -10,6 +10,7 @@
 
 #include "readline.h"
 
+#define MAXCMD 8
 #define MAXARG 256
 #define MAXBUF 4096
 
@@ -18,42 +19,46 @@ static const char *const DELIM  = " \t\n";
 
 static void print_help_and_exit();
 static void handle_sigint(int sig);
-static int  tokenize(char *input, char *argv[], size_t *argc);
+static int  tokenize(char *input, char *cmds[MAXCMD][MAXARG], int *cmdi,
+                     int *argi);
 
 volatile pid_t childpid = 0;
 
 int main() {
-  char   buf[MAXBUF];
-  size_t argc;
-  char  *argv[MAXARG];
+  char  buf[MAXBUF];
+  int   argi, cmdi;
+  char *cmds[MAXCMD][MAXARG];
 
   signal(SIGINT, handle_sigint);
 
   while ((readline(PROMPT, buf)) == 0) {
-    if (tokenize(buf, argv, &argc) != 0) exit(EXIT_FAILURE);
+    argi = 0;
+    cmdi = 0;
+    if (tokenize(buf, cmds, &cmdi, &argi) != 0) exit(EXIT_FAILURE);
+    buf[0] = '\0';
 
-    // eval
-    if (argc == 0) continue;
-    if (strcmp(argv[0], "quit") == 0) exit(EXIT_SUCCESS);
-    if (strcmp(argv[0], "help") == 0) print_help_and_exit();
+    // // eval
+    // if (cmdi == 0) continue;
+    // if (strcmp(argv[0], "quit") == 0) exit(EXIT_SUCCESS);
+    // if (strcmp(argv[0], "help") == 0) print_help_and_exit();
 
-    if ((childpid = fork()) < 0) {
-      perror("fork error");
-      exit(EXIT_FAILURE);
-    }
+    // if ((childpid = fork()) < 0) {
+    //   perror("fork error");
+    //   exit(EXIT_FAILURE);
+    // }
 
-    // child process
-    if (childpid == 0) {
-      if (execvp(argv[0], argv) < 0) {
-        perror("exec error");
-        exit(EXIT_FAILURE);
-      }
-      exit(EXIT_FAILURE);
-    }
+    // // child process
+    // if (childpid == 0) {
+    //   if (execvp(argv[0], argv) < 0) {
+    //     perror("exec error");
+    //     exit(EXIT_FAILURE);
+    //   }
+    //   exit(EXIT_FAILURE);
+    // }
 
-    // parent
-    int status;
-    waitpid(childpid, &status, 0);
+    // // parent
+    // int status;
+    // waitpid(childpid, &status, 0);
   }
 
   return EXIT_SUCCESS;
@@ -69,21 +74,37 @@ static void handle_sigint(int sig) {
   if (kill(childpid, sig) < 0) perror("SIGINT error");
 }
 
-static int tokenize(char *input, char *argv[], size_t *argc) {
-  *argc = 0;
+#ifdef DEBUG
+static void debug_command_table(char *cmds[MAXCMD][MAXARG], int cmdi, int argi) {
+  for (int i = 0; i <= cmdi; i++) {
+    printf("Command[%i] {\n", i);
+    for (int j = 0; j <= argi; j++) {
+      if (cmds[i][j] == NULL) continue;
+      printf("  Arg[%i] = %s,\n", j, cmds[i][j]);
+    }
+    printf("}\n");
+  }
+}
+#endif
 
-  char *rest = input;
-  char *tok;
+static int tokenize(char *input, char *cmds[MAXCMD][MAXARG], int *cmdi,
+                    int *argi) {
+  char *tok, *rest = input;
 
   while ((tok = strsep(&rest, DELIM)) != NULL) {
     if (*tok == '\0') continue;
-    if (*argc < MAXARG - 1) {
-      argv[(*argc)++] = tok;
-    } else {
-      fprintf(stderr, "Too many arguments\n");
-      return -1;
+    if (*tok == '|') {
+      cmds[(*cmdi)++][(*argi)] = NULL;
+      *argi                    = 0;
+      continue;
+    }
+    if ((*cmdi < MAXCMD - 1) && (*argi < MAXARG - 1)) {
+      cmds[*cmdi][(*argi)++] = tok;
     }
   }
-  argv[*argc] = NULL;
+  cmds[(*cmdi)][(*argi)] = NULL;
+#ifdef DEBUG
+  debug_command_table(cmds, *cmdi, *argi);
+#endif
   return 0;
 }
