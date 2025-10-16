@@ -12,7 +12,7 @@
 
 #define MAXCMD 8
 #define MAXARG 256
-#define MAXBUF 4096
+#define MAXBUF 2048
 
 static const char *const PROMPT = "> ";
 static const char *const DELIM  = " \t\n";
