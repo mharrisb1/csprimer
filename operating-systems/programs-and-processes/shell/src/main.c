@@ -17,18 +17,16 @@
 static const char *const PROMPT = "> ";
 static const char *const DELIM  = " \t\n";
 
-static void handle_sigint(int sig);
-static int  tokenize(char *input, char *cmds[MAXCMD][MAXARG], int *cmdi,
-                     int *argi);
-
-volatile pid_t childpid = 0;
+// static void handle_sigint(int sig);
+static int tokenize(char *input, char *cmds[MAXCMD][MAXARG], int *cmdi,
+                    int *argi);
 
 int main() {
   char  buf[MAXBUF];
   int   argi, cmdi;
   char *cmds[MAXCMD][MAXARG];
 
-  signal(SIGINT, handle_sigint);
+  // signal(SIGINT, handle_sigint);
 
   while ((readline(PROMPT, buf)) == 0) {
     argi = 0;
@@ -40,17 +38,26 @@ int main() {
     if (strcmp(cmds[0][0], "quit") == 0) exit(EXIT_SUCCESS);
     if (strcmp(cmds[0][0], "help") == 0) printf("Type `quit` to exit\n");
 
-    // single command
-    if (cmdi == 0) {
+    int fds[2];
+    int infd = 0;
+    int childpids[cmdi + 1];
+    for (int i = 0; i <= cmdi; i++) {
+      if (i != cmdi) pipe(fds);
 
-      if ((childpid = fork()) < 0) {
+      if ((childpids[i] = fork()) < 0) {
         perror("fork error");
         exit(EXIT_FAILURE);
       }
 
-      // child process
-      if (childpid == 0) {
-        if (execvp(cmds[cmdi][0], cmds[cmdi]) < 0) {
+      // child
+      if (childpids[i] == 0) {
+        if (i != cmdi) {
+          dup2(fds[1], STDOUT_FILENO);
+          close(fds[1]);
+          close(fds[0]);
+        }
+        dup2(infd, STDIN_FILENO);
+        if (execvp(cmds[i][0], cmds[i]) < 0) {
           perror("exec error");
           exit(EXIT_FAILURE);
         }
@@ -58,8 +65,13 @@ int main() {
       }
 
       // parent
-      int status;
-      waitpid(childpid, &status, 0);
+      infd = fds[0];
+      if (i != cmdi) close(fds[1]);
+    }
+
+    int status;
+    for (int i = 0; i <= cmdi; i++) {
+      waitpid(childpids[i], &status, 0);
     }
     buf[0] = '\0';
   }
@@ -67,10 +79,10 @@ int main() {
   return EXIT_SUCCESS;
 }
 
-static void handle_sigint(int sig) {
-  if (!childpid) return;
-  if (kill(childpid, sig) < 0) perror("SIGINT error");
-}
+// static void handle_sigint(int sig) {
+//   if (!childpid) return;
+//   if (kill(childpid, sig) < 0) perror("SIGINT error");
+// }
 
 #ifdef DEBUG
 static void debug_command_table(char *cmds[MAXCMD][MAXARG], int cmdi, int argi) {
@@ -92,6 +104,8 @@ static int tokenize(char *input, char *cmds[MAXCMD][MAXARG], int *cmdi,
   while ((tok = strsep(&rest, DELIM)) != NULL) {
     if (*tok == '\0') continue;
     if (*tok == '|') {
+      if (*argi == 0) return -1; // bail on invalid sequence
+
       cmds[(*cmdi)++][(*argi)] = NULL;
       *argi                    = 0;
       continue;
