@@ -2,9 +2,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#define MAX_DEPTH 2
+
 typedef struct {
   int *arr;
   int  n;
+  int  depth;
 } sortargs_t;
 
 void merge(int *arr, int n, int mid) {
@@ -35,30 +38,37 @@ void merge(int *arr, int n, int mid) {
   free(x);
 }
 
-void sort(int *arr, int n);
+void sort(int *arr, int n, int depth);
 
 void *start(void *args) {
-  int *arr = ((sortargs_t *)args)->arr;
-  int  n   = ((sortargs_t *)args)->n;
-  sort(arr, n);
+  int *arr   = ((sortargs_t *)args)->arr;
+  int  n     = ((sortargs_t *)args)->n;
+  int  depth = ((sortargs_t *)args)->depth;
+  sort(arr, n, depth);
   return NULL;
 }
 
-void sort(int *arr, int n) {
+void sort(int *arr, int n, int depth) {
   if (n < 2) return;
 
   int mid = n / 2;
 
-  // child execute left-hand side
-  pthread_t  t;
-  sortargs_t args = {arr, mid};
-  pthread_create(&t, NULL, start, (void *)&args);
+  if (depth > MAX_DEPTH) {
+    // merge
+    sort(arr, mid, depth + 1);
+    sort(arr + mid, n - mid, depth + 1);
+  } else {
+    // child execute left-hand side
+    pthread_t  t;
+    sortargs_t args = {arr, mid, depth + 1};
+    pthread_create(&t, NULL, start, (void *)&args);
 
-  // parent execute right-hand side
-  sort(arr + mid, n - mid);
+    // parent execute right-hand side
+    sort(arr + mid, n - mid, depth + 1);
 
-  // wait for child
-  pthread_join(t, NULL);
+    // wait for child
+    pthread_join(t, NULL);
+  }
 
   // merge
   merge(arr, n, mid);
@@ -76,7 +86,7 @@ int main() {
 
   printf("Sorting %d random integers\n", n);
 
-  sort(arr, n);
+  sort(arr, n, 0);
 
   // assert that the output is sorted
   for (int i = 0; i < n - 1; i++) {
