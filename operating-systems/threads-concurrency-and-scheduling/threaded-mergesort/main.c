@@ -53,7 +53,7 @@ void sort(int *arr, int n, int depth) {
 
   int mid = n / 2;
 
-  if (depth > MAX_DEPTH) {
+  if (depth >= MAX_DEPTH) {
     // merge
     sort(arr, mid, depth + 1);
     sort(arr + mid, n - mid, depth + 1);
@@ -86,7 +86,7 @@ int main() {
 
   printf("Sorting %d random integers\n", n);
 
-  sort(arr, n, 0);
+  sort(arr, n, 1);
 
   // assert that the output is sorted
   for (int i = 0; i < n - 1; i++) {
