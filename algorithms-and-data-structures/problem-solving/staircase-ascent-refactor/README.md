@@ -1,3 +1,3 @@
 # Staircase ascent refactor
 
-Show how backtracking can improve performance here.
+Refactor to avoid all duplicative work and show the difference.
