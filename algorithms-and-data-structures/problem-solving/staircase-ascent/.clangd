@@ -1,0 +1,4 @@
+InlayHints:
+  Enabled: Yes
+  ParameterNames: Yes # Show parameter names before function arguments
+  DeducedTypes: Yes
