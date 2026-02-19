@@ -1,0 +1,5 @@
+-Wall
+-Wextra
+-Wstringop-overread
+-std=c11
+-I.
