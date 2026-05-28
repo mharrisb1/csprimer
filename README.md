@@ -7,3 +7,5 @@
 3. [Computer Programming](./computer-programming)
 4. [Operating Systems](./operating-systems)
 5. [Algorithms and Data Structures](./algorithms-and-data-structures)
+6. [Relational Databases](./relational-databases)
+
