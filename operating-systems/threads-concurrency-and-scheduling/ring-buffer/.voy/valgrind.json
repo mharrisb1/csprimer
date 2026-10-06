@@ -1,0 +1,16 @@
+{
+  "routes": [
+    {
+      "name": "test",
+      "watch": ["main.c"],
+      "events": ["modify"],
+      "action": {
+        "command": [
+          "gcc -g -O0 -DDEBUG $VOY_EVENT_PATH",
+          "&&",
+          "valgrind --leak-check=full --track-origins=yes -s ./a.out"
+        ]
+      }
+    }
+  ]
+}

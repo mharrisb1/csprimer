@@ -5,7 +5,11 @@
       "watch": ["main.c"],
       "events": ["modify"],
       "action": {
-        "command": ["./test.sh"]
+        "command": [
+          "gcc -g -O0 -DDEBUG $VOY_EVENT_PATH",
+          "&&",
+          "strace ./a.out"
+        ]
       }
     }
   ]
