@@ -1,0 +1,12 @@
+{
+  "routes": [
+    {
+      "name": "test",
+      "watch": ["main.c"],
+      "events": ["modify"],
+      "action": {
+        "command": ["./test.sh"]
+      }
+    }
+  ]
+}
