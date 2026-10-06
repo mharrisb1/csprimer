@@ -18,21 +18,21 @@ void  q_push(queue_t* q, long item);
 long  q_pop (queue_t* q);
 
 int main() {
-  queue_t* q = q_init(64);
+  queue_t* q = q_init(4);
   if (q == NULL) {
     fprintf(stderr, "Failed to initialize queue\n");
     exit(EXIT_FAILURE);
   }
 
-  for (int i = 0; i < 10; i++) {
-    printf("push=\tq[%zu]\t=\t%i\n", q->tail, i);
-    q_push(q, i);
-    printf("pop=\tq[%zu]\t=\t%ld\n", q->head, q_pop(q));
-  }
-  q_push(q, 1);
-  q_push(q, 2);
-  q_push(q, 3);
+  for (int i = 0; i < 100; i++) {
+    size_t head, tail;
+    head = q->head;
+    tail = q->tail;
 
+    printf("push=\tq[%zu]\t=\t%i\n", tail, i);
+    q_push(q, i);
+    printf("pop=\tq[%zu]\t=\t%ld\n", head, q_pop(q));
+  }
   q_free(q);
   return 0;
 }
@@ -65,11 +65,12 @@ void q_free(queue_t* q) {
 }
 
 void q_push(queue_t* q, long item) {
-  q->tail           = ++q->tail % q->capacity;
   q->items[q->tail] = item;
+  q->tail           = ++q->tail % q->capacity;
 } 
 
 long q_pop(queue_t* q) {
-  q->head = q->head % q->capacity;
-  return q->items[q->head++];
+  long item = q->items[q->head];
+  q->head   = ++q->head % q->capacity;
+  return item;
 }
