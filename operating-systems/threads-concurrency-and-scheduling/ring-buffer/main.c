@@ -1,102 +1,131 @@
-#include <stddef.h>
+#include <pthread.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <string.h>
-
-#define DEBUG_SIZE (x) printf("sizeof(" #x ")\t=\t%zu\n", sizeof(x)); 
 
 typedef struct {
-  size_t capacity;
-  size_t head;
-  size_t tail;
-  long*  items;
+  unsigned int    size;       // current size of buffer
+  unsigned int    capacity;   // max capacity of buffer (immutable)
+  unsigned int    wp;         // writer pointer
+  unsigned int    rp;         // reader pointer
+  unsigned int*   buf;        // items stored in buffer
+  pthread_mutex_t lock;       // mutex
+  pthread_cond_t  writeable;  // writeable condition variable
+  pthread_cond_t  readable;   // readable condition variable
 } queue_t;
 
-queue_t* q_init (size_t capacity);
-void     q_free (queue_t* q);
-void     q_debug(queue_t* q);
+void*        producer(void* arg);
+void*        consumer(void* arg);
 
-void  q_push(queue_t* q, long item);
-long  q_pop (queue_t* q);
+queue_t*     queue_init(unsigned int capacity);
+void         queue_free(queue_t* q);
+
+void         enqueue(queue_t* q, unsigned int item);
+unsigned int dequeue(queue_t* q);
 
 int main() {
-  // Disable buffering for stdout
-  setvbuf(stdout, NULL, _IONBF, 0);
+  queue_t* q = queue_init(4);
+  if (q == NULL) return 1;
 
-  queue_t* q = q_init(4);
-  if (q == NULL) {
-    fprintf(stderr, "Failed to initialize queue\n");
-    return -1;
+  int i, n, m;
+  n = 3;
+  m = 5;
+  pthread_t prod[n], cons[m];
+
+  // create producers
+  for (i = 0; i < n; i++) {
+    pthread_create(&prod[i], NULL, producer, q);
   }
 
-  q_push(q, 1);
-  q_pop (q);
-  q_pop (q);
-  q_pop (q);
-  q_pop (q);
+  // create consumers
+  for (i = 0; i < m; i++) {
+    pthread_create(&cons[i], NULL, consumer, q);
+  }
 
-  q_free(q);
-  return 0;
+  // join producers
+  for (i = 0; i < n; i++) {
+    pthread_join(prod[i], NULL);
+  }
+
+  // join consumers
+  for (i = 0; i < m; i++) {
+    pthread_join(cons[i], NULL);
+  }
+
+  queue_free(q);
 }
 
-queue_t* q_init(size_t capacity) {
+void* producer(void* arg) {
+  queue_t* q = (queue_t*)arg;
+  int i = 0;
+  while(1) {
+    enqueue(q, i++ % 100);
+  }
+}
+
+void* consumer(void* arg) {
+  queue_t* q = (queue_t*)arg;
+  while(1) {
+    dequeue(q);
+  }
+}
+
+queue_t* queue_init(unsigned int capacity) {
   queue_t* q = malloc(sizeof(queue_t));
   if (q == NULL) {
-    return NULL;
+    return q;
   }
 
+  q->size     = 0;
   q->capacity = capacity;
-  q->head     = 0;
-  q->tail     = 0;
+  q->wp       = 0;
+  q->rp       = 0;
+  q->buf      = calloc(q->capacity, sizeof(unsigned int));
 
-  q->items = calloc(q->capacity, sizeof(long));
-  if (q->items == NULL) {
-    free(q);
-    return NULL;
-  }
+  pthread_mutex_init(&q->lock, NULL);
+  pthread_cond_init(&q->writeable, NULL);
+  pthread_cond_init(&q->readable, NULL);
 
   return q;
 }
 
-void q_free(queue_t* q) {
-  free(q->items);
-  q->items = NULL;
+void queue_free(queue_t* q) {
+  if (q == NULL) return;
+
+  pthread_mutex_destroy(&q->lock);
+  pthread_cond_destroy(&q->writeable);
+  pthread_cond_destroy(&q->readable);
+
+  free(q->buf);
+  q->buf = NULL;
 
   free(q);
-  q = NULL;
 }
 
-void q_debug(queue_t* q) {
-    printf("queue_t {\n");
-    printf("  capacity = %zu\n", q->capacity); 
-    printf("  head     = %zu\n", q->head);
-    printf("  tail     = %zu\n", q->tail);
-    printf("  items    = {\n");
-    for (size_t i = 0; i < q->capacity; i++) {
-      char hptr[7] = "";
-      char tptr[6] = "";
-      if (i == q->head) strcpy(hptr, "[<-h] ");
-      if (i == q->tail) strcpy(tptr, "[<-t]");
-      printf("    [%zu] = %ld %s%s\n", i, q->items[i], hptr, tptr);
-    }
-    printf("  }\n");
-    printf("}\n");
+void enqueue(queue_t* q, unsigned int item) {
+  pthread_mutex_lock(&q->lock);
+  // block to ensure no loss in data for the readers
+  while (q->size == q->capacity) {
+    pthread_cond_wait(&q->writeable, &q->lock);
+  }
+  q->buf[q->wp] = item;
+  printf("[thread %lu] %2u -> [%2u]\n", pthread_self(), item, q->wp);
+  q->wp = (q->size + 1) % q->capacity;
+  q->size++;
+  pthread_cond_signal(&q->readable);
+  pthread_mutex_unlock(&q->lock);
 }
 
-void q_push(queue_t* q, long item) {
-  q->items[q->tail] = item;
-#ifdef DEBUG
-  q_debug(q);
-#endif
-  q->tail           = ++q->tail % q->capacity;
-} 
-
-long q_pop(queue_t* q) {
-  long item         = q->items[q->head];
-  // q->items[q->head] = 0; // RESET
-#ifdef DEBUG
-  q_debug(q);
-#endif
-  q->head           = ++q->head % q->capacity;
+unsigned int dequeue(queue_t* q) {
+  pthread_mutex_lock(&q->lock);
+  // don't allow reading if nothing is in queue
+  while(q->size == 0) {
+    pthread_cond_wait(&q->readable, &q->lock);
+  }
+  unsigned int item = q->buf[q->rp];
+  printf("[thread %lu]       [%2u] -> %2u\n", pthread_self(), q->rp, item);
+  q->rp = (q->wp + 1) % q->capacity;
+  q->size--;
+  pthread_cond_signal(&q->writeable);
+  pthread_mutex_unlock(&q->lock);
   return item;
 }
