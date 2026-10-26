@@ -11,4 +11,4 @@ __pycache__
 dist
 !.clang-format
 *.swp
-
+perf.data*

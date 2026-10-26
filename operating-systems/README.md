@@ -5,3 +5,4 @@
 3. [Threads, concurrency, and scheduling](./threads-concurrency-and-scheduling)
 4. [Virtual Memory](./virtual-memory)
 5. [File Systems](./file-systems)
+6. [Virtual Memory](./virtual-memory)
