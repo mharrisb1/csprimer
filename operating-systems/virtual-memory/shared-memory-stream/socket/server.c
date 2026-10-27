@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 #include <arpa/inet.h>
 #include <netinet/in.h>
@@ -24,4 +25,16 @@ int main() {
   self.sin_port = htons(port);
   bind(sock, (struct sockaddr*)&self, sizeof(self));
   listen(sock, 10);
+
+  for (;;) {
+    conn = accept(sock, (struct sockaddr*)&client, &clientlen);
+    printf("Connection accepted\n");
+    checksum = 0;
+    for (int i = 0; i < max; i++) {
+      n = rand();
+      checksum ^= n;
+      send(conn, &n, sizeof(int), 0);
+    }
+    printf("Sent %i random ints to client, checksum %i\n", max, checksum);
+  }
 }
